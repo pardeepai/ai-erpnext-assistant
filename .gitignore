@@ -38,3 +38,7 @@ Thumbs.db
 *.swo
 # Debug files
 debug/
+.gradio/
+note.txt
+state_debug.txt
+.gradio/
