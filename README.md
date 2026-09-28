@@ -20,20 +20,18 @@ Analyzer
 Reflector
      ↓
 Conditional Routing
-
    ↙              ↘
-
 Approved       Not Approved
    ↓                ↓
   END            Feedback
-                    ↓
-                  Lesson
-                    ↓
+                     ↓
+                   Lesson
+                     ↓
              Previous Attempts
-                    ↓
-                 Analyzer
-                    ↓
-                Reflector
+                     ↓
+                  Analyzer
+                     ↓
+                 Reflector
 ```
 
 The workflow can repeat until the response is approved or the maximum iteration limit is reached.
@@ -50,6 +48,8 @@ The workflow can repeat until the response is approved or the maximum iteration 
 * Deterministic order-count validation using Python
 * FastAPI API layer
 * Gradio comparison UI
+* Live LangGraph node execution in Gradio
+* LangSmith tracing and observability
 * Local LLM inference with Ollama
 
 ## Customer-wise Sales Order Retrieval
@@ -130,10 +130,99 @@ A simple list in the LangGraph state is used to store previous attempts. No vect
 
 ### Reflexion Demo
 
-Screenshot showing the current Reflexion workflow.
+Screenshot showing the Reflexion workflow.
 
-<img width="1551" height="627" alt="image" src="https://github.com/user-attachments/assets/ea32dd11-4e2d-4841-84b5-4efc16db3876" />
+<img width="1551" height="627" alt="Reflexion workflow" src="https://github.com/user-attachments/assets/ea32dd11-4e2d-4841-84b5-4efc16db3876" />
 
+## Live Workflow Streaming
+
+The Gradio interface uses LangGraph workflow streaming to display node execution while the Reflexion workflow is running.
+
+Example:
+
+```text
+Starting Reflexion workflow...
+
+✓ analyzer
+✓ reflector
+✓ feedback
+✓ lesson
+
+✓ analyzer
+✓ reflector
+✓ feedback
+✓ lesson
+
+✓ analyzer
+✓ reflector
+
+✓ Workflow completed
+```
+
+This makes the execution of the LangGraph workflow visible instead of waiting only for the final response.
+
+The streaming flow is:
+
+```text
+workflow.stream()
+       ↓
+Analyzer
+       ↓
+Reflector
+       ↓
+Conditional Routing
+       ↓
+Feedback / END
+       ↓
+Lesson
+       ↓
+Analyzer
+       ↓
+...
+```
+
+### Live Workflow Demo
+
+Add the screenshot of the Gradio UI showing the live node execution here.
+
+```text
+[Live workflow screenshot]
+```
+
+## LangSmith Observability
+
+The project uses **LangSmith** for tracing and observability of the LangGraph workflow.
+
+LangSmith helps inspect:
+
+* Workflow execution
+* LLM calls
+* Node execution
+* Inputs and outputs
+* Multiple Reflexion iterations
+* Execution traces
+
+The application loads LangSmith configuration from environment variables:
+
+```text
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=<your-api-key>
+LANGSMITH_PROJECT=ai-erpnext-assistant
+```
+
+The API key is stored in `.env` and is not committed to the repository.
+
+```text
+Gradio
+   ↓
+LangGraph Workflow
+   ↓
+Analyzer → Reflector → Feedback → Lesson
+   ↓
+LangSmith Traces
+```
+
+LangSmith provides observability into the workflow, while LangGraph is responsible for executing the workflow and conditional routing.
 
 ## Deterministic Validation
 
@@ -157,6 +246,7 @@ This helps prevent the LLM from incorrectly interpreting similar ERPNext statuse
 
 ```text
 To Deliver
+
 To Deliver and Bill
 ```
 
@@ -168,25 +258,27 @@ The Gradio UI compares the same customer-specific sales-order analysis:
 
 ```text
 ┌─────────────────────┬────────────────────────┐
-│ Without Reflexion   │ With Reflexion         │
-│                     │                        │
-│ Customer            │ Customer               │
-│    ↓                │    ↓                   │
-│ Analyzer            │ Analyzer               │
-│    ↓                │    ↓                   │
-│ First Answer        │ Reflector              │
-│                     │    ↓                   │
-│                     │ Feedback               │
-│                     │    ↓                   │
-│                     │ Lesson                 │
-│                     │    ↓                   │
-│                     │ Analyzer Again         │
-│                     │    ↓                   │
-│                     │ Final Answer            │
+│ Without Reflexion   │ With Reflexion          │
+│                     │                         │
+│ Customer            │ Customer                │
+│    ↓                │    ↓                    │
+│ Analyzer            │ Analyzer                │
+│    ↓                │    ↓                    │
+│ First Answer        │ Reflector               │
+│                     │    ↓                    │
+│                     │ Feedback                │
+│                     │    ↓                    │
+│                     │ Lesson                  │
+│                     │    ↓                    │
+│                     │ Analyzer Again          │
+│                     │    ↓                    │
+│                     │ Final Answer             │
 └─────────────────────┴────────────────────────┘
 ```
 
 The comparison demonstrates the difference between a direct LLM response and a response processed through the Reflexion workflow.
+
+The **With Reflexion** workflow also displays live node execution while the graph is running.
 
 ## Reliability Note
 
@@ -196,7 +288,10 @@ The project therefore separates deterministic business logic from LLM-generated 
 
 * Python handles verified order counts.
 * The LLM handles analysis and explanation.
-* Reflexion provides review, feedback, lesson generation, and retry.
+* Reflector reviews the generated response.
+* Reflexion provides feedback, lesson generation, and retry.
+* LangGraph controls workflow execution and routing.
+* LangSmith provides workflow observability and tracing.
 
 Reflexion improves the review and retry process but does not guarantee factual correctness.
 
@@ -204,7 +299,7 @@ Future improvements will include broader automated evaluation and additional rel
 
 ## Tech Stack
 
-**Python · FastAPI · LangGraph · LangChain · Ollama · Qwen 2.5 3B · ERPNext · Gradio**
+**Python · FastAPI · LangGraph · LangChain · LangSmith · Ollama · Qwen 2.5 3B · ERPNext · Gradio**
 
 ## Project Structure
 
@@ -236,6 +331,8 @@ ai-erpnext-assistant/
 * [x] Maximum iteration control
 * [x] Deterministic order-count validation
 * [x] Gradio UI
+* [x] Live LangGraph workflow streaming
+* [x] LangSmith tracing and observability
 * [ ] Multi-Agent
 * [ ] Multi-Graph / Subgraphs
 * [ ] Evaluation

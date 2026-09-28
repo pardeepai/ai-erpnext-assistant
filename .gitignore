@@ -42,3 +42,8 @@ debug/
 note.txt
 state_debug.txt
 .gradio/
+
+.env
+.gradio/
+__pycache__/
+*.pyc
