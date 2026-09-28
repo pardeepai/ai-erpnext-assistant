@@ -184,10 +184,10 @@ Analyzer
 
 ### Live Workflow Demo
 
-Add the screenshot of the Gradio UI showing the live node execution here.
 
 ```text
-[Live workflow screenshot]
+<img width="1815" height="867" alt="image" src="https://github.com/user-attachments/assets/ab318e3e-c466-4310-af96-b1f66be580fc" />
+
 ```
 
 ## LangSmith Observability
