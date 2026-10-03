@@ -135,7 +135,8 @@ A simple list in the LangGraph state is used to store previous attempts. No vect
 
 Screenshot showing the Reflexion workflow.
 
-<img width="1798" height="822" alt="Reflexion workflow" src="https://github.com/user-attachments/assets/ea635e14-0cc9-4ad4-a16a-7b7866ecaf47" />
+<img width="1521" height="791" alt="image" src="https://github.com/user-attachments/assets/9d7c65e4-5b2c-475a-90b3-6ea24e292348" />
+
 
 ## Live Workflow Streaming
 
@@ -183,7 +184,8 @@ Analyzer
 
 ### Live Workflow Demo
 
-<img width="1815" height="867" alt="Live workflow" src="https://github.com/user-attachments/assets/ab318e3e-c466-4310-af96-b1f66be580fc" />
+<img width="1521" height="791" alt="image" src="https://github.com/user-attachments/assets/44d5e153-e406-4e16-9166-7080bfa2933b" />
+
 
 ## LangSmith Observability
 
