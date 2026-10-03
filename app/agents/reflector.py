@@ -2,80 +2,78 @@ from langchain_ollama import ChatOllama
 
 
 class SalesOrderReflector:
-    def __init__(self):
-        self.llm = ChatOllama(
-            model="qwen2.5:3b",
-            temperature=0,
-        )
 
-    def reflect(
-        self,
-        analysis: str,
-        sales_orders: dict,
-        order_counts: dict,
-    ):
-        expected_pending = order_counts["pending"]
-        print("EXPECTED:", f"**Pending Orders:** {expected_pending}")
-        print("ANALYSIS:", repr(analysis))
-        if f"**Pending Orders:** {expected_pending}" not in analysis:
-            return {
-                    "reflection": (
-                    f"Pending Orders count is incorrect. "
-                    f"Expected {expected_pending}."
-        ),
-        "approved": False,
-    }
-            
-        prompt = f"""
+  def __init__(self):
+    self.llm = ChatOllama(
+        model="qwen2.5:3b",
+        temperature=0,
+    )
+
+  def reflect(
+      self,
+      analysis: str,
+      sales_orders: dict,
+      order_counts: dict,
+  ):
+    prompt = f"""
 You are a strict fact-checking reviewer for a sales order assistant.
 
 ACTUAL SALES ORDER DATA:
 {sales_orders}
 
+VERIFIED ORDER COUNTS:
+{order_counts}
+
 ANALYSIS TO REVIEW:
 {analysis}
 
-Review only the factual statements about order statuses.
+BUSINESS RULES:
 
-IMPORTANT RULES:
+- Total Orders = order_counts["total"]
+- Completed Orders = order_counts["completed"]
+- Pending Orders = order_counts["pending"] + order_counts["draft"]
+- Cancelled Orders = order_counts["cancelled"]
 
-1. Compare statuses with the EXACT status in the actual data.
+STATUS DEFINITIONS:
 
-2. "To Deliver" and "To Deliver and Bill" are different statuses.
+- Completed = "Completed"
+- Pending = "To Deliver", "To Bill", "To Deliver and Bill", or "Draft"
+- Cancelled = "Cancelled"
 
-3. "To Deliver" is NOT Pending.
+CHECK THE ANALYSIS:
 
-4. ONLY "To Deliver and Bill" is Pending.
+1. Check whether Total Orders is correct.
+2. Check whether Completed Orders is correct.
+3. Check whether Pending Orders correctly includes Draft orders.
+4. Check whether Cancelled Orders is correct.
 
-5. Do not invent or change order information.
+IMPORTANT:
+Do NOT require a "- Draft Orders: 0" line.
+Focus on whether the actual numbers are correct.
 
-6. Do not check numerical counts.
-   Python has already verified the numerical counts.
+If any number is incorrect:
+APPROVED: False
+REFLECTION: Explain which number is incorrect and what the correct number should be.
 
-If the analysis correctly describes the actual statuses,
-approve it.
+If all numbers are correct:
+APPROVED: True
+REFLECTION: The order counts are correct.
 
 Return ONLY:
-
 APPROVED: True or False
 REFLECTION: <short explanation>
 """
+    response = self.llm.invoke(prompt)
+    content = response.content.strip()
+    approved = "APPROVED: True" in content
+    reflection = (
+        content.replace("APPROVED: True", "")
+        .replace("APPROVED: False", "")
+        .replace("REFLECTION:", "")
+        .strip()
+    )
 
-        response = self.llm.invoke(prompt)
-
-        content = response.content.strip()
-
-        approved = "APPROVED: True" in content
-
-        reflection = content.replace(
-            "APPROVED: True", ""
-        ).replace(
-            "APPROVED: False", ""
-        ).replace(
-            "REFLECTION:", ""
-        ).strip()
-
-        return {
-            "reflection": reflection,
-            "approved": approved,
-        }
+    return {
+        "reflection": reflection,
+        "approved": approved,
+    }

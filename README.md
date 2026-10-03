@@ -24,14 +24,14 @@ Conditional Routing
 Approved       Not Approved
    ↓                ↓
   END            Feedback
-                     ↓
-                   Lesson
-                     ↓
-             Previous Attempts
-                     ↓
-                  Analyzer
-                     ↓
-                 Reflector
+                    ↓
+                  Lesson
+                    ↓
+            Previous Attempts
+                    ↓
+                 Analyzer
+                    ↓
+                Reflector
 ```
 
 The workflow can repeat until the response is approved or the maximum iteration limit is reached.
@@ -74,12 +74,15 @@ This ensures that the Analyzer receives only the relevant customer's sales-order
 
 The **Analyzer** generates the sales-order summary.
 
-The **Reflector** reviews the response for:
+The **Reflector** reviews the generated response against the verified ERPNext order data and deterministic order counts.
 
-* Correctness
-* Clarity
-* Consistency
-* Unsupported claims or assumptions
+It checks:
+
+* Total Orders
+* Completed Orders
+* Pending Orders
+* Cancelled Orders
+* Whether Draft orders are correctly included in Pending Orders
 
 If the response is not approved, LangGraph routes the workflow through the improvement process.
 
@@ -132,8 +135,7 @@ A simple list in the LangGraph state is used to store previous attempts. No vect
 
 Screenshot showing the Reflexion workflow.
 
-<img width="1798" height="822" alt="image" src="https://github.com/user-attachments/assets/ea635e14-0cc9-4ad4-a16a-7b7866ecaf47" />
-
+<img width="1798" height="822" alt="Reflexion workflow" src="https://github.com/user-attachments/assets/ea635e14-0cc9-4ad4-a16a-7b7866ecaf47" />
 
 ## Live Workflow Streaming
 
@@ -151,14 +153,11 @@ Starting Reflexion workflow...
 
 ✓ analyzer
 ✓ reflector
-✓ feedback
-✓ lesson
-
-✓ analyzer
-✓ reflector
 
 ✓ Workflow completed
 ```
+
+The exact number of iterations depends on whether the Reflector approves the generated response or requests another attempt.
 
 This makes the execution of the LangGraph workflow visible instead of waiting only for the final response.
 
@@ -184,10 +183,7 @@ Analyzer
 
 ### Live Workflow Demo
 
-
-
-<img width="1815" height="867" alt="image" src="https://github.com/user-attachments/assets/ab318e3e-c466-4310-af96-b1f66be580fc" />
-
+<img width="1815" height="867" alt="Live workflow" src="https://github.com/user-attachments/assets/ab318e3e-c466-4310-af96-b1f66be580fc" />
 
 ## LangSmith Observability
 
@@ -232,13 +228,13 @@ For example:
 
 ```text
 ERPNext Data
-     ↓
+    ↓
 Python
-     ↓
+    ↓
 Verified Order Counts
-     ↓
+    ↓
 LangGraph State
-     ↓
+    ↓
 Analyzer / Reflector
 ```
 
@@ -250,7 +246,16 @@ To Deliver
 To Deliver and Bill
 ```
 
-The application treats these as different statuses, with only **To Deliver and Bill** considered a Pending order.
+The application treats these ERPNext statuses as distinct statuses, while mapping the relevant statuses to the business-level Pending Orders count:
+
+```text
+To Deliver
+To Bill
+To Deliver and Bill
+Draft
+```
+
+Draft orders are included in the Pending Orders count for the assistant's business-level summary.
 
 ## Gradio Demo
 
@@ -258,21 +263,21 @@ The Gradio UI compares the same customer-specific sales-order analysis:
 
 ```text
 ┌─────────────────────┬────────────────────────┐
-│ Without Reflexion   │ With Reflexion          │
-│                     │                         │
-│ Customer            │ Customer                │
-│    ↓                │    ↓                    │
-│ Analyzer            │ Analyzer                │
-│    ↓                │    ↓                    │
-│ First Answer        │ Reflector               │
-│                     │    ↓                    │
-│                     │ Feedback                │
-│                     │    ↓                    │
-│                     │ Lesson                  │
-│                     │    ↓                    │
-│                     │ Analyzer Again          │
-│                     │    ↓                    │
-│                     │ Final Answer             │
+│ Without Reflexion   │ With Reflexion         │
+│                     │                        │
+│ Customer            │ Customer               │
+│    ↓                │    ↓                   │
+│ Analyzer            │ Analyzer               │
+│    ↓                │    ↓                   │
+│ First Answer        │ Reflector              │
+│                     │    ↓                   │
+│                     │ Feedback               │
+│                     │    ↓                   │
+│                     │ Lesson                 │
+│                     │    ↓                   │
+│                     │ Analyzer Again         │
+│                     │    ↓                   │
+│                     │ Final Answer           │
 └─────────────────────┴────────────────────────┘
 ```
 

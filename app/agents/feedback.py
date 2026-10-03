@@ -2,6 +2,7 @@ from langchain_ollama import ChatOllama
 
 
 class FeedbackAgent:
+
     def __init__(self):
         self.llm = ChatOllama(
             model="qwen2.5:3b",
@@ -12,40 +13,23 @@ class FeedbackAgent:
         prompt = f"""
 You are a feedback agent.
 
-The reflection below identifies a factual mistake in a sales order
-analysis.
-
-Your job is to convert the reflection into a clear correction
-instruction for the next analysis.
+The Reflector reviewed the previous analysis and identified a problem.
 
 Reflection:
 {reflection}
 
-STRICT RULES:
+Your task:
+Convert the reflection into a clear correction instruction
+for the Analyzer's next attempt.
 
-1. Do not change any facts from the reflection.
+The instruction should explain:
+- what was wrong
+- what the Analyzer should do differently
+- what rule should be followed
 
-2. Do not invent any information.
-
-3. ERPNext status names must be preserved exactly.
-
-4. "To Deliver" and "To Deliver and Bill" are different statuses.
-
-5. "To Deliver" is NOT a Pending Order.
-
-6. ONLY "To Deliver and Bill" is considered Pending.
-
-7. If the reflection says the actual status is "To Deliver",
-   the feedback MUST say:
-   - use the exact status "To Deliver"
-   - do NOT classify it as Pending
-
-8. Do not replace the actual status with a similar status.
-
-9. Do not reinterpret the status.
-
-10. Tell the next analyzer to use the actual ERPNext data
-    as the source of truth.
+Do not invent new information.
+Do not focus on formatting unless the reflection specifically
+identifies a formatting problem.
 
 Give only the correction instruction.
 """

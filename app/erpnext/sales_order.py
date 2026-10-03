@@ -24,7 +24,7 @@ class SalesOrderService:
             "pending": 0,
             "cancelled": 0,
             "draft": 0,
-            "to_deliver": 0,
+            "to_deliver": 0
         }
 
         for order in order_list:
@@ -33,7 +33,7 @@ class SalesOrderService:
             if status == "Completed":
                 counts["completed"] += 1
 
-            elif status == "To Deliver and Bill":
+            elif status in ['To Deliver', 'To Deliver and Bill', 'To Bill', 'Overdue']:
                 counts["pending"] += 1
 
             elif status == "Cancelled":
@@ -42,7 +42,6 @@ class SalesOrderService:
             elif status == "Draft":
                 counts["draft"] += 1
 
-            elif status == "To Deliver":
-                counts["to_deliver"] += 1
+            
 
         return counts

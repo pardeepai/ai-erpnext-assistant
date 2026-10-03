@@ -2,6 +2,7 @@ from langchain_ollama import ChatOllama
 
 
 class LessonAgent:
+
     def __init__(self):
         self.llm = ChatOllama(
             model="qwen2.5:3b",
@@ -12,8 +13,9 @@ class LessonAgent:
         prompt = f"""
 You are a lesson agent.
 
-Based on the reflection and feedback below, create one simple,
-general lesson that can help improve future analyses.
+Based on the reflection and feedback below, create
+one short reusable rule that the Analyzer should remember
+for future attempts.
 
 Reflection:
 {reflection}
@@ -21,10 +23,16 @@ Reflection:
 Feedback:
 {feedback}
 
-Give only the lesson.
-Do not invent information.
+Create a lesson that:
+- captures the actual mistake
+- states the correct rule
+- can be reused in future attempts
+- does not focus on formatting unless formatting was the actual problem
+- does not invent new information
+
+Give only the short lesson.
 """
 
         response = self.llm.invoke(prompt)
 
-        return response.content
+        return response.content.strip()
