@@ -1,8 +1,8 @@
 from langchain_ollama import ChatOllama
-from app.graph.prompts import CUSTOMER_PROMPT
+from app.graph.prompts import CUSTOMER_CONTACT_PROMPT
 
 
-class CustomerAgent:
+class CustomerContactAgent:
 
     def __init__(self):
         self.llm = ChatOllama(
@@ -10,10 +10,10 @@ class CustomerAgent:
             temperature=0,
         )
 
-    def customer_response(self, user_query, customer_data):
-        messages = CUSTOMER_PROMPT.invoke({
+    def contact_response(self, user_query, contact_data):
+        messages = CUSTOMER_CONTACT_PROMPT.invoke({
             "user_query": user_query,
-            "customer_data": customer_data,
+            "contact_data": contact_data,
         })
         print("Messages sent to LLM:",messages )
 

@@ -1,5 +1,5 @@
 from app.erpnext.customer import CustomerService
-from app.agents.customer_agent import CustomerAgent
+from app.agents.customer_details_agent import CustomerDetailsAgent
 
 
 def main():
@@ -11,7 +11,7 @@ def main():
     print(result)
 
     # Pass ERPNext data to Customer Agent
-    agent = CustomerAgent()
+    agent = CustomerDetailsAgent()
 
     response = agent.customer_response(
         user_query="Show me the customer details",

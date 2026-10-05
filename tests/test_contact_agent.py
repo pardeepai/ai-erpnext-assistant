@@ -1,5 +1,6 @@
 from app.erpnext.contact import ContactService
-from app.agents.contact_agent import ContactAgent
+from app.agents.customer_contact_agent import CustomerContactAgent
+
 
 
 def main():
@@ -12,7 +13,7 @@ def main():
     print(contact_data)
 
     # Pass ERPNext data to Contact Agent
-    agent = ContactAgent()
+    agent = CustomerContactAgent()
 
     response = agent.contact_response(
         user_query="Show me the contact details",
