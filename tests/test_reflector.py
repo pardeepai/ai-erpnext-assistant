@@ -16,7 +16,28 @@ The only order placed by the customer sandeep is currently
 in Draft status.
 """
 
-result = reflector.reflect(analysis)
+sales_orders = [
+    {
+        "name": "SAL-ORD-2026-00001",
+        "customer": "sandeep",
+        "status": "Draft",
+    }
+]
+
+order_counts = {
+    "total": 1,
+    "completed": 0,
+    "pending": 0,
+    "cancelled": 0,
+    "draft": 1,
+    "to_deliver": 0,
+}
+
+result = reflector.reflect(
+    analysis,
+    sales_orders,
+    order_counts,
+)
 
 print("Reflection:", result["reflection"])
 print("Approved:", result["approved"])

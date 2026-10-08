@@ -13,7 +13,9 @@ httpx
 
 # Environment variables
 python-dotenv
-#
 
+# HTTP requests
 requests
-gradio==6.0.1
+
+# Testing
+pytest

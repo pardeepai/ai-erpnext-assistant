@@ -26,9 +26,8 @@ def main(user_query):
     # Step 2: Supervisor decides the route
     # --------------------------------------------------
 
-    route = supervisor_agent.supervisor_response(
+    route = supervisor_agent.supervisor_route(
         user_query=user_query,
-        customer_data=""
     )
 
     print("\nSupervisor Route:")
