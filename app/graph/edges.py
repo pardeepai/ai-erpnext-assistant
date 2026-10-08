@@ -17,6 +17,7 @@ def should_continue(state):
     
 
 def route_request(state):
+    log_state(f"route_request: {state}", state)
     if state["route"] == "contact":
         print("ROUTING DECISION: Contact route, moving to contact agent")
         return "contact_agent"
@@ -33,6 +34,7 @@ def route_request(state):
 
 
 def route_after_details(state):
+    log_state(f"route_after_details: {state}", state)
     if state["route"] == "both":
         print("ROUTING DECISION: Both route, moving to contact agent")
         return "contact_agent"
@@ -40,10 +42,11 @@ def route_after_details(state):
     print("ROUTING DECISION: Details route completed, moving to final response")
     return "final_response"
 
-def route_after_contact(state):
-    if state["route"] == "both":
-        print("ROUTING DECISION: Both route completed, moving to final response")
-        return "final_response"
+# def route_after_contact(state):
+#     log_state(f"route_after_contact: {state}", state)
+#     if state["route"] == "both":
+#         print("ROUTING DECISION: Both route completed, moving to final response")
+#         return "final_response"
 
-    print("ROUTING DECISION: Contact route completed, moving to final response")
-    return "final_response"
+#     print("ROUTING DECISION: Contact route completed, moving to final response")
+#     return "final_response"

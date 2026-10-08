@@ -96,6 +96,7 @@ def lesson_node(state: AgentState):
 
 #----------------Multi Agent Nodes-------------------
 def extract_customer_node(state):
+    log_state(f"extract_customer_node: {state}", state)
     customer_name = supervisor.extract_customer_name(
         state["user_query"]
     )
@@ -126,6 +127,7 @@ def supervisor_route_node(state):
     }
 
 def details_agent_node(state):
+    log_state(f"details_agent_node: {state}", state)
     user_query = state["user_query"]
     customer_details = state["customer_details"]
 
@@ -140,6 +142,7 @@ def details_agent_node(state):
     
 
 def contact_agent_node(state):
+    log_state(f"contact_agent_node: {state}", state)
     user_query = state["user_query"]
     customer_name = state["customer_name"]
 
@@ -158,11 +161,13 @@ def contact_agent_node(state):
     }
 
 def final_response_node(state):
+    log_state(f"final_response_node: {state}", state)
     customer_name = state["customer_name"]
 
     print(state, "state in final response node")
 
     if state["route"] == "details":
+        print("Generating final response for details route")
 
         customer_details = state["customer_details"]["data"][0]
 
@@ -174,6 +179,7 @@ def final_response_node(state):
                 """
 
     elif state["route"] == "contact":
+        print("Generating final response for contact route")
 
         customer_contact = state["customer_contact"]["data"][0]
 
@@ -185,6 +191,7 @@ def final_response_node(state):
                 """
 
     elif state["route"] == "both":
+        print("Generating final response for both route")
 
         customer_details = state["customer_details"]["data"][0]
         customer_contact = state["customer_contact"]["data"][0]

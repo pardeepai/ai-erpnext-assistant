@@ -4,7 +4,6 @@ from app.graph.state import MultiAgentState as AgentState
 from app.graph.edges import (
     route_request,
     route_after_details,
-    route_after_contact,
 )
 from app.graph.nodes import (
     extract_customer_node,
@@ -30,6 +29,7 @@ graph.add_node("final_response", final_response_node)
 # Normal edges
 graph.add_edge(START, "customer_name")
 graph.add_edge("customer_name", "route")
+graph.add_edge("contact_response", "final_response")
 
 
 # Conditional routing from supervisor
@@ -53,14 +53,15 @@ graph.add_conditional_edges(
     },
 )
 
-graph.add_conditional_edges(
-    "contact_response",
-    route_after_contact,
-    {
-        "final_response": "final_response",
-    },
-)
+# graph.add_conditional_edges(
+#     "contact_response",
+#     route_after_contact,
+#     {
+#         "final_response": "final_response",
+#     },
+# )
 
 
 # Compile the graph
 workflow = graph.compile()
+print(workflow.get_graph().draw_mermaid())
