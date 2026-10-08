@@ -47,3 +47,4 @@ state_debug.txt
 .gradio/
 __pycache__/
 *.pyc
+tests/reflexion_debug.txt
