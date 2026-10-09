@@ -20,7 +20,14 @@ The application uses ERPNext as its business data source and a locally running L
 
 The screenshot below shows the application running in Gradio.
 
-![AI ERPNext Business Assistant application demo](data/your-screenshot-filename.png)
+<img width="1510" height="875" alt="image" src="https://github.com/user-attachments/assets/0b4d8040-27a3-4eb8-b7da-e2b072b7e9c5" />
+<img width="1488" height="745" alt="image" src="https://github.com/user-attachments/assets/873be11a-1be8-43fc-a91e-c4e9bfdfa941" />
+<img width="523" height="502" alt="image" src="https://github.com/user-attachments/assets/9c1ff6b1-c755-441a-be8a-0e3dc9680756" />
+<img width="1282" height="547" alt="image" src="https://github.com/user-attachments/assets/a6e441d0-6f43-45a3-85d5-3efd4951a749" />
+
+
+
+
 
 > Replace `data/your-screenshot-filename.png` with the actual path to your screenshot. Keep the screenshot committed to the repository so it appears on GitHub.
 
