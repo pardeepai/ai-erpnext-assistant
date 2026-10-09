@@ -25,12 +25,6 @@ The screenshot below shows the application running in Gradio.
 <img width="523" height="502" alt="image" src="https://github.com/user-attachments/assets/9c1ff6b1-c755-441a-be8a-0e3dc9680756" />
 <img width="1282" height="547" alt="image" src="https://github.com/user-attachments/assets/a6e441d0-6f43-45a3-85d5-3efd4951a749" />
 
-
-
-
-
-> Replace `data/your-screenshot-filename.png` with the actual path to your screenshot. Keep the screenshot committed to the repository so it appears on GitHub.
-
 ## Architecture
 
 The project uses different LangGraph workflows to demonstrate increasingly capable AI application patterns.
@@ -100,7 +94,7 @@ flowchart TD
 | `sales_order_response` | Processes the retrieved sales order information into a response. |
 | `final_response` | Produces the final response for the selected processing path. |
 
-The customer details path can continue to the contact response when contact information is also required. The sales order path retrieves the relevant orders and passes the result to the sales order response node before reaching the final response.
+The customer details path can continue to the contact response when contact information is also required. The sales order path retrieves the relevant orders and passes the result to the sales order response node before finalization.
 
 ## Specialized Agents
 
@@ -230,9 +224,6 @@ This supports debugging and understanding how the application processes a reques
 ## Project Structure
 
 ```text
-## Project Structure
-
-```text
 ai-erpnext-assistant/
 ├── app/
 │   ├── agents/
@@ -286,7 +277,8 @@ ai-erpnext-assistant/
 ├── main.py
 ├── pytest.ini
 ├── requirements.txt
-└── README.md
+├── README.md
+└── .gitignore
 ```
 
 ### Directory Overview
@@ -302,7 +294,6 @@ ai-erpnext-assistant/
 - **`main.py`** — Main application entry point.
 - **`pytest.ini`** — Pytest configuration.
 - **`requirements.txt`** — Python dependencies.
-```
 
 *Note: This tree reflects the known project structure. Keep any additional files that exist in your actual repository, including agent modules and test files.*
 
@@ -353,10 +344,16 @@ Keep credentials in a local `.env` file or another secure configuration mechanis
 
 ### 6. Run the application
 
-Launch the entry point corresponding to the workflow you want to test. For example, if `multi_agent_gradio_app.py` is configured as the Multi-Agent Gradio entry point:
+Launch the entry point corresponding to the workflow you want to test. For example, for the Gradio multi-agent app:
 
 ```bash
-python multi_agent_gradio_app.py
+python app/multi_agent_gradio_app.py
+```
+
+Alternatively, run the earlier Gradio app:
+
+```bash
+python app/gradio_app.py
 ```
 
 Follow the local URL displayed by Gradio to interact with the application.
