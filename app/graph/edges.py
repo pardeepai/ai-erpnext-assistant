@@ -16,8 +16,10 @@ def should_continue(state):
         return "max_iterations"
     
 
+
 def route_request(state):
     log_state(f"route_request: {state}", state)
+
     if state["route"] == "contact":
         print("ROUTING DECISION: Contact route, moving to contact agent")
         return "contact_agent"
@@ -30,7 +32,12 @@ def route_request(state):
         print("ROUTING DECISION: Both route, moving to details agent")
         return "details_agent"
 
+    if state["route"] == "sales_order":
+        print("ROUTING DECISION: Sales order route, moving to sales order data")
+        return "sales_order_agent"
+
     raise ValueError(f"Unknown route: {state['route']}")
+
 
 
 def route_after_details(state):

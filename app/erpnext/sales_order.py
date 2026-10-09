@@ -1,19 +1,35 @@
 ﻿from app.erpnext.client import ERPNextClient
-
+import json
 
 class SalesOrderService:
     def __init__(self):
         self.client = ERPNextClient()
-
-    def get_sales_orders(self, customer, limit=10):
+        
+        
+    def get_sales_orders(self, customer, status=None, limit=10):
+        filters = [
+            ["customer", "=", customer]
+    ]
+        
+        if status:
+            filters.append(["status", "=", status])
+            
+            
         return self.client.get(
             "/api/resource/Sales Order",
-            params={
-                "fields": '["name", "customer", "transaction_date", "status"]',
-                "filters": f'[["customer", "=", "{customer}"]]',
-                "limit_page_length": limit,
-            },
-        )
+                params={
+                    "fields": json.dumps([
+                        "name",
+                        "customer",
+                        "transaction_date",
+                        "status",
+                    ]),
+                    "filters": json.dumps(filters),
+                    "limit_page_length": limit,
+                },
+            )
+
+
 
     def get_order_counts(self, orders):
         order_list = orders.get("data", [])

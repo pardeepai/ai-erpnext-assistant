@@ -20,9 +20,11 @@ class MultiAgentState(TypedDict):
 
     customer_details: dict
     customer_contact: dict
+    sales_order_data: dict
 
     route: str
 
     contact_response: str
     details_response: str
+    sales_order_response: str
     final_response: str
