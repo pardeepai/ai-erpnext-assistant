@@ -24,6 +24,10 @@ The screenshot below shows the application running in Gradio.
 <img width="1488" height="745" alt="image" src="https://github.com/user-attachments/assets/873be11a-1be8-43fc-a91e-c4e9bfdfa941" />
 <img width="523" height="502" alt="image" src="https://github.com/user-attachments/assets/9c1ff6b1-c755-441a-be8a-0e3dc9680756" />
 <img width="1282" height="547" alt="image" src="https://github.com/user-attachments/assets/a6e441d0-6f43-45a3-85d5-3efd4951a749" />
+<img width="525" height="530" alt="image" src="https://github.com/user-attachments/assets/0423a249-e00d-4caa-8725-07cdbe9eb4ab" />
+<img width="482" height="650" alt="image" src="https://github.com/user-attachments/assets/32d9e76d-a3c0-4750-80d9-53a4e18ec016" />
+
+
 
 ## Architecture
 
