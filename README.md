@@ -12,7 +12,7 @@ The project has evolved through three stages:
 
 - **Reflection:** Analyzes retrieved sales order data and reviews the generated answer.
 - **Reflexion:** Uses feedback and lessons from previous attempts to improve an answer through an iterative workflow.
-- **Multi-Agent System:** Routes user requests to specialized agents for customer details, contact information, or sales order queries.
+- **Multi-Agent System:** Routes user requests to specialized agents for customer details, contact information, or sales order queries with support for combined requests.
 
 The application uses ERPNext as its business data source and a locally running LLM for language processing.
 
@@ -27,7 +27,42 @@ The screenshot below shows the application running in Gradio.
 <img width="525" height="530" alt="image" src="https://github.com/user-attachments/assets/0423a249-e00d-4caa-8725-07cdbe9eb4ab" />
 <img width="482" height="650" alt="image" src="https://github.com/user-attachments/assets/32d9e76d-a3c0-4750-80d9-53a4e18ec016" />
 
+## Features
 
+- **Customer Details:** Retrieve customer information, including customer type and customer group.
+- **Customer Contact:** Retrieve customer contact information, including phone number and email address.
+- **Sales Order Retrieval:** Fetch customer sales orders with optional status filtering.
+- **Multi-Agent Workflow:** Route user queries to the appropriate agent based on the request.
+- **Combined Queries:** Support requests for:
+  - Customer details and sales orders
+  - Contact information and sales orders
+  - Customer details, contact information, and sales orders together
+- **Conditional Routing:** Execute the required agents based on the detected query intent.
+- **Structured Responses:** Format customer information and sales-order results for readability.
+
+## Example Queries
+
+**Customer details**
+
+- "Show me Sandeep's customer group."
+- "Show me Sandeep's customer details."
+
+**Contact information**
+
+- "Show me Sandeep's mobile number."
+- "Show me Sandeep's email address."
+
+**Sales orders**
+
+- "Show me Sandeep's sales orders."
+- "Show me Sandeep's Draft sales orders."
+- "Show me Sandeep's Completed sales orders."
+
+**Combined queries**
+
+- "Show me Sandeep's customer group and sales orders."
+- "Show me Sandeep's mobile number and sales orders."
+- "Show me Sandeep's customer group, mobile number, and sales orders."
 
 ## Architecture
 
@@ -64,7 +99,7 @@ This workflow demonstrates how a graph can use state, conditional edges, and ite
 
 ### 3. Multi-Agent Workflow
 
-The Multi-Agent workflow routes user requests to the appropriate processing path.
+The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence.
 
 ```mermaid
 flowchart TD
@@ -75,18 +110,33 @@ flowchart TD
     route -. "contact_agent" .-> contact_response[contact_response]
     route -. "sales_order_agent" .-> sales_order_data[sales_order_data]
 
-    details_response -.-> contact_response
+    details_response -. "contact_agent" .-> contact_response
     details_response -.-> final_response[final_response]
 
     contact_response --> final_response
 
     sales_order_data --> sales_order_response[sales_order_response]
-    sales_order_response --> final_response
+    sales_order_response -. "contact_agent" .-> contact_response
+    sales_order_response -. "details_agent" .-> details_response
+    sales_order_response -.-> final_response
 
     final_response --> end_node([END])
 ```
 
-#### Workflow components
+#### Multi-Agent Workflow Steps
+
+1. **Customer Name Extraction:** Extract the customer name from the user's query.
+2. **Supervisor Routing:** Identify the requested information and select the appropriate route.
+3. **Agent Execution:**
+   - Customer Details Agent retrieves customer details.
+   - Customer Contact Agent retrieves contact information.
+   - Sales Order Agent retrieves and formats sales orders.
+4. **Conditional Routing:** For combined queries, execute the required agents in sequence.
+5. **Final Response:** Combine the requested information into one response.
+
+The workflow supports individual requests and combined requests for customer details, contact information, and sales orders.
+
+#### Workflow Components
 
 | Component | Responsibility |
 |---|---|
@@ -98,15 +148,20 @@ flowchart TD
 | `sales_order_response` | Processes the retrieved sales order information into a response. |
 | `final_response` | Produces the final response for the selected processing path. |
 
-The customer details path can continue to the contact response when contact information is also required. The sales order path retrieves the relevant orders and passes the result to the sales order response node before finalization.
-
 ## Specialized Agents
 
 ### Customer Supervisor Agent
 
 The supervisor interprets the user's query and determines which customer-related processing path is appropriate.
 
-It supports routing for customer details, contact information, and sales order requests.
+It supports routing for:
+- Customer details only
+- Contact information only
+- Sales orders only
+- Customer details and contact information
+- Customer details and sales orders
+- Contact information and sales orders
+- All three (customer details, contact information, and sales orders)
 
 ### Customer Details Agent
 
@@ -172,7 +227,7 @@ This structure helps separate:
 - Response preparation
 - Final response generation
 
-## Validation and Testing
+## Testing
 
 The project includes validation of agent behavior and workflow execution.
 
@@ -186,8 +241,17 @@ Completed validation includes:
 - Retrieving all customer sales orders when no status is specified
 - Passing sales order data through the Multi-Agent workflow
 - Validating state updates and final response generation across the workflow
+- Verified combined customer details and sales order responses
+- Verified combined contact and sales order responses
+- Verified combined customer details, contact, and sales order responses
 
-Example sales order queries:
+Run the test suite with:
+
+```bash
+python -m pytest
+```
+
+Example sales order queries tested:
 
 - Show me Sandeep's Draft orders.
 - Show me Sandeep's Completed orders.
@@ -400,6 +464,9 @@ The project follows these principles:
 - [x] Handling requests without a status filter
 - [x] Integration of the Sales Order Agent into the complete Multi-Agent workflow
 - [x] End-to-end validation of routing, state updates, and final responses
+- [x] Combined customer and sales order routing
+- [x] Combined contact and sales order routing
+- [x] Combined customer details, contact, and sales order routing
 
 ## Project Goals
 
