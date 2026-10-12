@@ -5,6 +5,7 @@ from app.graph.state import MultiAgentState as AgentState
 from app.graph.edges import (
     route_request,
     route_after_details,
+    route_after_sales_order,
 )
 from app.graph.nodes import (
     extract_customer_node,
@@ -34,7 +35,6 @@ graph.add_edge("customer_name", "route")
 
 graph.add_edge("contact_response", "final_response")
 graph.add_edge("sales_order_data", "sales_order_response")
-graph.add_edge("sales_order_response", "final_response")
 
 # Conditional routing from supervisor
 graph.add_conditional_edges(
@@ -56,6 +56,18 @@ graph.add_conditional_edges(
         "final_response": "final_response",
     },
 )
+
+
+graph.add_conditional_edges(
+    "sales_order_response",
+    route_after_sales_order,
+    {
+        "contact_agent": "contact_response",
+        "details_agent": "details_response",
+        "final_response": "final_response",
+    },
+)
+
 
 # Compile the graph
 workflow = graph.compile()
