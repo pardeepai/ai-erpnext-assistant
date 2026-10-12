@@ -59,14 +59,26 @@ class SalesOrderAgent:
             return None
         
         return status
+    
+    
+    def sales_order_response(self, user_query, sales_order_data):
+        orders = sales_order_data.get("data", [])
 
-    def sales_order_response(self, user_query, sales_data):
-        messages = SALES_ORDER_PROMPT.invoke({
-            "user_query": user_query,
-            "sales_data": sales_data,
-        })
-        print("Messages sent to LLM:",messages )
+        if not orders:
+            return "No sales orders found for this customer."
 
-        response = self.llm.invoke(messages)
+        lines = [
+            "| Sales Order ID | Customer | Order Status |",
+            "|---|---|---|",
+        ]
 
-        return response.content.strip()
+        for order in orders:
+            order_id = order.get("name") or "Not Provided"
+            customer = order.get("customer") or "Not Provided"
+            status = order.get("status") or "Not Provided"
+
+            lines.append(
+                f"| {order_id} | {customer} | {status} |"
+            )
+
+        return "**Sales Orders:**\n\n" + "\n".join(lines)

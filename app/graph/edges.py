@@ -35,6 +35,19 @@ def route_request(state):
     if state["route"] == "sales_order":
         print("ROUTING DECISION: Sales order route, moving to sales order data")
         return "sales_order_agent"
+    
+    if state["route"] == "details_and_sales_order":
+        print("ROUTING DECISION: Sales order route, moving to sales order data")
+        return "sales_order_agent"
+    
+    if state["route"] == "contact_and_sales_order":
+        print("ROUTING DECISION: Sales order route, moving to sales order data")
+        return "sales_order_agent"
+    
+    if state["route"] == "all":
+        print("ROUTING DECISION: Sales order route, moving to sales order data")
+        return "sales_order_agent"
+
 
     raise ValueError(f"Unknown route: {state['route']}")
 
@@ -42,11 +55,26 @@ def route_request(state):
 
 def route_after_details(state):
     log_state(f"route_after_details: {state}", state)
-    if state["route"] == "both":
+    if state["route"] in ["all","both"]:
         print("ROUTING DECISION: Both route, moving to contact agent")
         return "contact_agent"
-
     print("ROUTING DECISION: Details route completed, moving to final response")
+    return "final_response"
+
+def route_after_sales_order(state):
+    log_state(f"route_after_sales_order: {state}", state)
+
+    route = state["route"]
+
+    if route == "details_and_sales_order":
+        return "details_agent"
+
+    elif route == "contact_and_sales_order":
+        return "contact_agent"
+
+    elif route == "all":
+        return "details_agent"
+
     return "final_response"
 
 # def route_after_contact(state):
