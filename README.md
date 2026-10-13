@@ -96,28 +96,40 @@ This workflow demonstrates how a graph can use state, conditional edges, and ite
 
 ### 3. Multi-Agent Workflow
 
-The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below reflects the current routing logic implemented in app/graph/workflow_multi.py: the supervisor node chooses one or more agents (details, contact, sales order), and agents may trigger follow-on agents depending on the route.
+The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flow exported from the compiled workflow (your workflow Mermaid id):
 
 ```mermaid
-flowchart TD
-    start([START]) --> customer_name[customer_name]
-    customer_name --> route{route}
-
-    route -. "details_agent" .-> details_response[details_response]
-    route -. "contact_agent" .-> contact_response[contact_response]
-    route -. "sales_order_agent" .-> sales_order_data[sales_order_data]
-
-    details_response -. "contact_agent" .-> contact_response
-    details_response -.-> final_response[final_response]
-
-    contact_response --> final_response
-
-    sales_order_data --> sales_order_response[sales_order_response]
-    sales_order_response -. "contact_agent" .-> contact_response
-    sales_order_response -. "details_agent" .-> details_response
-    sales_order_response -.-> final_response
-
-    final_response --> end_node([END])
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+        __start__([<p>__start__</p>]):::first
+        customer_name(customer_name)
+        route(route)
+        details_response(details_response)
+        contact_response(contact_response)
+        sales_order_data(sales_order_data)
+        sales_order_response(sales_order_response)
+        final_response(final_response)
+        __end__([<p>__end__</p>]):::last
+        __start__ --> customer_name;
+        contact_response --> final_response;
+        customer_name --> route;
+        details_response -. &nbsp;contact_agent&nbsp; .-> contact_response;
+        details_response -.-> final_response;
+        route -. &nbsp;contact_agent&nbsp; .-> contact_response;
+        route -. &nbsp;details_agent&nbsp; .-> details_response;
+        route -. &nbsp;sales_order_agent&nbsp; .-> sales_order_data;
+        sales_order_data --> sales_order_response;
+        sales_order_response -. &nbsp;contact_agent&nbsp; .-> contact_response;
+        sales_order_response -. &nbsp;details_agent&nbsp; .-> details_response;
+        sales_order_response -.-> final_response;
+        final_response --> __end__;
+        classDef default fill:#f2f0ff,line-height:1.2
+        classDef first fill-opacity:0
+        classDef last fill:#bfb6fc
 ```
 
 #### Multi-Agent Workflow Steps
@@ -302,9 +314,9 @@ ai-erpnext-assistant/
 │   │   ├── feedback.py
 │   │   ├── lesson.py
 │   │   ├── customer_supervisor.py
-│   │   ├── customer_details_agent.py
-│   │   ├── customer_contact_agent.py
-│   │   └── sales_order_agent.py
+│   │   │   ├── customer_details_agent.py
+│   │   │   ├── customer_contact_agent.py
+│   │   │   └── sales_order_agent.py
 │   ├── api/
 │   │   └── routes.py
 │   ├── erpnext/
