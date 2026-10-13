@@ -22,11 +22,6 @@ The screenshot below shows the application running in Gradio.
 
 <img width="1510" height="875" alt="image" src="https://github.com/user-attachments/assets/0b4d8040-27a3-4eb8-b7da-e2b072b7e9c5" />
 <img width="1488" height="745" alt="image" src="https://github.com/user-attachments/assets/873be11a-1be8-43fc-a91e-c4e9bfdfa941" />
-<img width="523" height="502" alt="image" src="https://github.com/user-attachments/assets/9c1ff6b1-c755-441a-be8a-0e3dc9680756" />
-<img width="1282" height="547" alt="image" src="https://github.com/user-attachments/assets/a6e441d0-6f43-45a3-85d5-3efd4951a749" />
-<img width="525" height="530" alt="image" src="https://github.com/user-attachments/assets/0423a249-e00d-4caa-8725-07cdbe9eb4ab" />
-<img width="482" height="650" alt="image" src="https://github.com/user-attachments/assets/32d9e76d-a3c0-4750-80d9-53a4e18ec016" />
-<img width="448" height="815" alt="image" src="https://github.com/user-attachments/assets/fb35ed93-395b-4f80-9492-c35504ab2feb" />
 
 
 ## Features
@@ -101,7 +96,7 @@ This workflow demonstrates how a graph can use state, conditional edges, and ite
 
 ### 3. Multi-Agent Workflow
 
-The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence.
+The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below reflects the current routing logic implemented in app/graph/workflow_multi.py: the supervisor node chooses one or more agents (details, contact, sales order), and agents may trigger follow-on agents depending on the route.
 
 ```mermaid
 flowchart TD
@@ -128,12 +123,12 @@ flowchart TD
 #### Multi-Agent Workflow Steps
 
 1. **Customer Name Extraction:** Extract the customer name from the user's query.
-2. **Supervisor Routing:** Identify the requested information and select the appropriate route.
+2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined requests are supported by executing agents in sequence.
 3. **Agent Execution:**
    - Customer Details Agent retrieves customer details.
    - Customer Contact Agent retrieves contact information.
    - Sales Order Agent retrieves and formats sales orders.
-4. **Conditional Routing:** For combined queries, execute the required agents in sequence.
+4. **Conditional Routing:** For combined queries, agents can indicate follow-on agents to execute (for example, after retrieving sales orders, the graph may route to the details or contact agents as defined in the compiled workflow).
 5. **Final Response:** Combine the requested information into one response.
 
 The workflow supports individual requests and combined requests for customer details, contact information, and sales orders.
@@ -231,21 +226,7 @@ This structure helps separate:
 
 ## Testing
 
-The project includes validation of agent behavior and workflow execution.
-
-Completed validation includes:
-
-- Customer name extraction
-- Customer details and contact processing
-- Routing to the appropriate agent
-- Sales order retrieval for a customer
-- Filtering sales orders by status
-- Retrieving all customer sales orders when no status is specified
-- Passing sales order data through the Multi-Agent workflow
-- Validating state updates and final response generation across the workflow
-- Verified combined customer details and sales order responses
-- Verified combined contact and sales order responses
-- Verified combined customer details, contact, and sales order responses
+### Automated Tests
 
 Run the test suite with:
 
@@ -253,14 +234,33 @@ Run the test suite with:
 python -m pytest
 ```
 
-Example sales order queries tested:
+Latest automated test run (from the most recent check):
 
-- Show me Sandeep's Draft orders.
-- Show me Sandeep's Completed orders.
-- Show me Sandeep's orders to deliver.
-- Show me Sandeep's Cancelled orders.
-- Show me Sandeep's To Deliver and Bill orders.
-- Show me all sales orders for Sandeep.
+- 2 tests collected
+- 2 tests passed
+
+Automated tests referenced in the repository and confirmed in the latest run:
+
+- tests/test_analyzer.py
+- tests/test_reflexion_debug.py
+
+Keep manual multi-agent validation separate from automated test results.
+
+### Manual Multi-Agent Validation
+
+Manually verified the seven routing combinations:
+
+- Customer details
+- Contact information
+- Sales orders
+- Customer details and contact information
+- Customer details and sales orders
+- Contact information and sales orders
+- Customer details, contact information, and sales orders
+
+Also verified sales order status filtering and the final responses for the tested queries.
+
+Only keep manual-validation claims for scenarios that were actually tested.
 
 ## LangSmith Observability
 
@@ -320,7 +320,7 @@ ai-erpnext-assistant/
 │   │   ├── workflow.py
 │   │   └── workflow_multi.py
 │   ├── gradio_app.py
-│   └── multi_agent_gradio_app.py
+│   │   └── multi_agent_gradio_app.py
 ├── data/
 │   ├── config.py
 │   └── item.py
@@ -357,15 +357,15 @@ ai-erpnext-assistant/
 - **`app/api/`** — Contains API route definitions.
 - **`app/erpnext/`** — Handles ERPNext API communication and customer, contact, and sales order data retrieval.
 - **`app/graph/`** — Defines graph state, nodes, prompts, routing logic, and workflows.
-- **`app/data/`** — Not used; application configuration and supporting data are currently under the top-level `data/` directory.
+- **`app/data/`** — Not used; configuration and supporting data are stored under the top-level `data/` directory.
 - **`data/`** — Contains application configuration and supporting data files.
 - **`debug/`** — Contains scripts and text files used during debugging and workflow development.
-- **`tests/`** — Contains tests for ERPNext services, agents, graph components, and workflows.
+- **`tests/`** — Contains tests for ERPNext services, agents, graph components, and workflows. The latest automated run collected two tests (see Testing above); compare the listed files to your repo if you want the README to exactly match the repository tree.
 - **`main.py`** — Main application entry point.
 - **`pytest.ini`** — Pytest configuration.
 - **`requirements.txt`** — Python dependencies.
 
-*Note: This tree reflects the known project structure. Keep any additional files that exist in your actual repository, including agent modules and test files.*
+*Note: This tree reflects the known project structure. Run `find app tests -maxdepth 3 -type f | sort` locally to verify the tree and remove or add entries so the README matches your repository exactly.*
 
 ## Getting Started
 
