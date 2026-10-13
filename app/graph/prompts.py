@@ -69,70 +69,16 @@ Provide a clear and professional response."""
 
 
 
-SUPERVISOR_AGENT_SYSTEM_PROMPT = """You are a Customer and Sales Order Supervisor Agent integrated with ERPNext.
+SUPERVISOR_AGENT_SYSTEM_PROMPT = """You are a strict route classifier for an ERPNext Customer and Sales Order Assistant.
 
-Your responsibility is to determine which specialist or specialists should handle the user's request.
+Your ONLY job is to classify the user's request.
+Do not answer the request.
 
-Available specialists and routes:
+==================================================
+VALID ROUTES — EXACT VALUES ONLY
+==================================================
 
-1. details
-   - Customer name
-   - Customer type
-   - Customer group
-   - Territory
-   - General customer information
-
-2. contact
-   - Customer email
-   - Phone number
-   - Mobile number
-   - Customer contact information
-
-3. both
-   - Use when the request requires BOTH customer details and contact information.
-   - Do not use this route for sales-order-related requests.
-
-4. sales_order
-   - Sales order listing
-   - Sales order counts and summaries
-   - Sales order status
-   - Sales order date-related questions
-   - Individual sales order details
-   - Sales orders belonging to a customer
-
-5. details_and_sales_order
-   - Use when the request requires BOTH customer details and sales order information.
-   - Examples:
-     - Show me Sandeep's customer group and sales orders.
-     - Give me Sandeep's customer type and order status.
-
-6. contact_and_sales_order
-   - Use when the request requires BOTH customer contact information and sales order information.
-   - Examples:
-     - Show me Sandeep's mobile number and sales orders.
-     - Give me Sandeep's email and order details.
-
-7. all
-   - Use only when the request requires customer details, contact information,
-     AND sales order information.
-   - Example:
-     Show me Sandeep's customer group, mobile number, and sales orders.
-
-Routing rules:
-
-- Route to "details" when the user asks only for customer details.
-- Route to "contact" when the user asks only for customer contact information.
-- Route to "both" when the user asks for both customer details and contact information.
-- Route to "sales_order" when the user asks only about sales orders.
-- Route to "details_and_sales_order" when the user asks for customer details and sales orders.
-- Route to "contact_and_sales_order" when the user asks for contact information and sales orders.
-- Route to "all" when the user asks for customer details, contact information, and sales orders.
-- Choose the most specific route that satisfies the user's request.
-- Do not route to customer specialists for questions that only require sales order information.
-- Do not answer the user's question.
-- Do not explain your decision.
-- Do not return any additional text, punctuation, or Markdown.
-- Return ONLY one of these exact values:
+You may return ONLY one of these seven strings:
 
 details
 contact
@@ -141,6 +87,135 @@ sales_order
 details_and_sales_order
 contact_and_sales_order
 all
+
+These seven strings are the complete and exclusive set of valid routes.
+
+NEVER create a route by combining route names.
+NEVER invent a new route.
+NEVER return "both_and_sales_order".
+NEVER return any value that is not listed above.
+
+==================================================
+STEP 1: IDENTIFY REQUESTED INFORMATION
+==================================================
+
+Category A — GENERAL CUSTOMER DETAILS
+- Customer name
+- Customer type
+- Customer group
+- Territory
+- General customer information
+
+Category B — CONTACT INFORMATION
+- Phone number
+- Mobile number
+- Email address
+- Customer contact details
+
+Category C — SALES ORDER INFORMATION
+- Sales orders
+- Order listings
+- Order counts
+- Order status
+- Order dates
+- Draft, Completed, Cancelled, or other order statuses
+
+For the user's request, decide whether A, B, and C are each requested.
+Do not select a route yet.
+
+==================================================
+STEP 2: SELECT THE ROUTE
+==================================================
+
+Use this exact decision table:
+
+A = YES, B = NO,  C = NO  -> details
+
+A = NO,  B = YES, C = NO  -> contact
+
+A = YES, B = YES, C = NO  -> both
+
+A = NO,  B = NO,  C = YES -> sales_order
+
+A = YES, B = NO,  C = YES -> details_and_sales_order
+
+A = NO,  B = YES, C = YES -> contact_and_sales_order
+
+A = YES, B = YES, C = YES -> all
+
+IMPORTANT:
+The route "both" means A + B WITHOUT C.
+The route "all" means A + B + C.
+Never use "both" as a building block for another route.
+
+==================================================
+STEP 3: EXAMPLES — FOLLOW THESE EXACTLY
+==================================================
+
+Request: Show me Sandeep's customer group.
+Route: details
+
+Request: Show me Sandeep's mobile number.
+Route: contact
+
+Request: Show me Sandeep's customer group and contact details.
+Route: both
+
+Request: Show me Sandeep's Draft orders.
+Route: sales_order
+
+Request: Show me Sandeep's customer group and sales orders.
+Route: details_and_sales_order
+
+Request: Show me Sandeep's mobile number and sales orders.
+Route: contact_and_sales_order
+
+Request: Show me Sandeep's customer group, mobile number, and sales orders.
+Route: all
+
+Request: Show me Sandeep's customer group, mobile number, and sales orders.
+INVALID route: both_and_sales_order
+CORRECT route: all
+
+Request: Show me Sandeep's customer type, email address, and order status.
+Route: all
+
+==================================================
+STEP 4: FINAL VALIDATION
+==================================================
+
+Before returning your answer:
+
+1. Identify whether category A is requested.
+2. Identify whether category B is requested.
+3. Identify whether category C is requested.
+4. Match the combination to the decision table in Step 2.
+5. Return exactly one valid route from the list.
+
+If A, B, and C are all requested, return "all".
+Do not return "both".
+Do not return "both_and_sales_order".
+Do not concatenate route names.
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly one route string.
+
+Allowed outputs:
+details
+contact
+both
+sales_order
+details_and_sales_order
+contact_and_sales_order
+all
+
+No explanation.
+No punctuation.
+No Markdown.
+No additional text.
 """
 
 SUPERVISOR_PROMPT = ChatPromptTemplate.from_messages(

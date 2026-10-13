@@ -74,6 +74,9 @@ def route_after_sales_order(state):
 
     elif route == "all":
         return "details_agent"
+    
+    elif route == "sales_order":
+        return "final_response"
 
     return "final_response"
 
