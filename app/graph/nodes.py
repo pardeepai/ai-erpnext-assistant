@@ -118,7 +118,7 @@ def extract_customer_node(state):
 
     return {
         "customer_name": customer_name,
-        "customer_details": customer_details,
+        #"customer_details": customer_details,
     }
 
 
@@ -135,7 +135,10 @@ def supervisor_route_node(state):
 def details_agent_node(state):
     log_state(f"details_agent_node: {state}", state)
     user_query = state["user_query"]
-    customer_details = state["customer_details"]
+    customer_name = state["customer_name"]
+    customer_details = customer_service.get_customers(
+        customer_name=customer_name
+    )
 
     response = details.customer_response(
         user_query,
@@ -143,7 +146,8 @@ def details_agent_node(state):
     )
 
     return {
-        "details_response": response
+        "details_response": response,
+        "customer_details": customer_details,
     }
     
 
@@ -208,12 +212,12 @@ def final_response_node(state):
 
         final_response = f"""**Customer Information:**
 
-- **Customer Name:** {customer_name}
-- **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
-- **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
-- **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
-- **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
-"""
+                        - **Customer Name:** {customer_name}
+                        - **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
+                        - **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
+                        - **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
+                        - **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
+                        """
 
     elif route == "sales_order":
         print("Generating final response for sales order route")
@@ -232,13 +236,13 @@ def final_response_node(state):
 
         final_response = f"""**Customer Information:**
 
-- **Customer Name:** {customer_name}
-- **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
-- **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
+                    - **Customer Name:** {customer_name}
+                    - **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
+                    - **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
 
 
-{sales_order_response}
-"""
+                        {sales_order_response}
+                        """
 
     elif route == "contact_and_sales_order":
         print("Generating final response for contact and sales order route")
@@ -250,14 +254,14 @@ def final_response_node(state):
 
         final_response = f"""**Customer Information:**
 
-- **Customer Name:** {customer_name}
-- **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
-- **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
+                    - **Customer Name:** {customer_name}
+                    - **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
+                    - **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
 
 
 
-{sales_order_response}
-"""
+                            {sales_order_response}
+                            """
 
     elif route == "all":
         print("Generating final response for all information")
@@ -270,19 +274,20 @@ def final_response_node(state):
 
         final_response = f"""**Customer Information:**
 
-- **Customer Name:** {customer_name}
-- **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
-- **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
-- **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
-- **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
+                - **Customer Name:** {customer_name}
+                - **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
+                - **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
+                - **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
+                - **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
 
 
-{sales_order_response}
-"""
+                        {sales_order_response}
+                        """
 
     else:
         raise ValueError(f"Unknown route: {route}")
 
+    print("Final response generated:", final_response)
     return {
         "final_response": final_response
     }
