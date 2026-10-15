@@ -38,6 +38,12 @@ The screenshot below shows the application running in Gradio.
 
 <img width="1510" height="875" alt="image" src="https://github.com/user-attachments/assets/0b4d8040-27a3-4eb8-b7da-e2b072b7e9c5" />
 <img width="1488" height="745" alt="image" src="https://github.com/user-attachments/assets/873be11a-1be8-43fc-a91e-c4e9bfdfa941" />
+<img width="482" height="502" alt="image" src="https://github.com/user-attachments/assets/55e572e6-0b19-470a-a971-368ac07c117c" />
+<img width="653" height="411" alt="image" src="https://github.com/user-attachments/assets/01d3f45f-6b53-4fe2-af05-cb5a742ed4ac" />
+<img width="487" height="405" alt="image" src="https://github.com/user-attachments/assets/9236a826-97fd-40b0-9ffc-cf6ee0042533" />
+
+
+
 
 
 ## Features
