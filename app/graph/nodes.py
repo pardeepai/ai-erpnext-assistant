@@ -12,6 +12,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from app.erpnext.customer import CustomerService
 from app.erpnext.sales_order import SalesOrderService
 from app.erpnext.contact import ContactService
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 analyzer = SalesOrderAnalyzer()
@@ -177,6 +180,13 @@ def final_response_node(state):
 
     customer_name = state["customer_name"]
     route = state["route"]
+    if state.get("sales_order_error"):
+        return {
+            "final_response": (
+                f"Error retrieving sales orders for {customer_name}: "
+                f"{state['sales_order_error']}"
+        )
+    }
 
     print(state, "state in final response node")
 
@@ -308,26 +318,94 @@ def sales_order_agent_node(state):
     }
 
 
+
+
+
 def retrieve_sales_orders_node(state):
-    log_state(f"retrieve_sales_orders_node: {state}", state)
+    log_state("retrieve_sales_orders_node started", state)
 
     user_query = state["user_query"]
     customer_name = state["customer_name"]
 
-    status = sales_order_agent.extract_sales_order_status(user_query)
-    print("Extracted status:", status)
-
     if not customer_name:
         return {
-            "sales_order_data": {"data": []}
+            "sales_order_data": {"data": []},
+            "sales_order_error": "Customer name is required.",
         }
 
-    orders = sales_services.get_sales_orders(
-        customer_name,
-        status=status,
-        limit=10,
-    )
+    try:
+        status_result = sales_order_agent.extract_sales_order_status(
+            user_query
+        )
 
-    return {
-        "sales_order_data": orders
-    }
+        # 1. Handle status validation errors before the API call.
+        if isinstance(status_result, dict) and status_result.get("error"):
+            error = status_result["error"]
+
+            print("Sales order status validation error:", error)
+
+            return {
+                "sales_order_data": {"data": []},
+                "sales_order_error": error,
+            }
+
+        # 2. Extract the status string.
+        if isinstance(status_result, dict):
+            status = status_result.get("status")
+        else:
+            # Backward compatibility with an extractor returning None
+            # or a status string directly.
+            status = status_result
+
+        print("Extracted status:", status)
+
+        # 3. Retrieve sales orders from ERPNext.
+        orders = sales_services.get_sales_orders(
+            customer_name,
+            status=status,
+            limit=10,
+        )
+
+        print("Retrieved sales orders:", orders)
+
+        # 4. Validate the response structure, not the number of orders.
+        if not isinstance(orders, dict) or "data" not in orders:
+            raise ValueError(
+                "Invalid sales order response from the service."
+            )
+
+        log_state(
+            "sales_order_status_extracted",
+            {
+                "user_query": user_query,
+                "extracted_status": status,
+            },
+        )
+
+        log_state(
+            "sales_order_data_retrieved",
+            {
+                "user_query": user_query,
+                "sales_order_data": orders,
+            },
+        )
+
+        # An empty data list is a valid result.
+        return {
+            "sales_order_data": orders,
+            "sales_order_error": None,
+        }
+
+    except Exception:
+        logger.exception(
+            "Failed to retrieve sales orders for customer: %s",
+            customer_name,
+        )
+
+        return {
+            "sales_order_data": {"data": []},
+            "sales_order_error": (
+                "Unable to retrieve sales orders right now. "
+                "Please try again later."
+            ),
+        }

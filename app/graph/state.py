@@ -28,3 +28,4 @@ class MultiAgentState(TypedDict):
     details_response: str
     sales_order_response: str
     final_response: str
+    sales_order_error: str | None
