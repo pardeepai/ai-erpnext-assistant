@@ -17,6 +17,7 @@ class AgentState(TypedDict):
 class MultiAgentState(TypedDict):
     user_query: str
     customer_name: str | None
+    customer_found: bool
 
     customer_details: dict
     customer_contact: dict

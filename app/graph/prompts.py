@@ -93,6 +93,7 @@ These seven strings are the complete and exclusive set of valid routes.
 NEVER create a route by combining route names.
 NEVER invent a new route.
 NEVER return "both_and_sales_order".
+NEVER return "both_and_contact".
 NEVER return any value that is not listed above.
 
 ==================================================
@@ -150,9 +151,15 @@ A = NO,  B = YES, C = YES -> contact_and_sales_order
 A = YES, B = YES, C = YES -> all
 
 IMPORTANT:
-The route "both" means A + B WITHOUT C.
-The route "all" means A + B + C.
-Never use "both" as a building block for another route.
+- The route "details" means Category A only.
+- The route "contact" means Category B only.
+- The route "both" means Category A + Category B WITHOUT Category C.
+- The route "sales_order" means Category C only.
+- The route "details_and_sales_order" means Category A + Category C.
+- The route "contact_and_sales_order" means Category B + Category C.
+- The route "all" means Category A + Category B + Category C.
+- Never use "both" as a building block for another route.
+- Never create a route by combining names such as "both_and_contact" or "both_and_sales_order".
 
 ==================================================
 STEP 3: EXAMPLES — FOLLOW THESE EXACTLY
@@ -172,6 +179,16 @@ Route: contact
 
 Request: Show me Sandeep's customer group and contact details.
 Route: both
+
+Request: Show me Mahesh's customer group, customer type, and contact details.
+Route: both
+
+Request: Show me Mahesh's customer group, customer type, and contact details.
+INVALID route: both_and_contact
+CORRECT route: both
+
+Request: Show me Mahesh's customer group, customer type, contact details, and sales orders.
+Route: all
 
 Request: Show me Sandeep's Draft orders.
 Route: sales_order
@@ -202,10 +219,12 @@ Before returning your answer:
 2. Identify whether category B is requested.
 3. Identify whether category C is requested.
 4. Match the combination to the decision table in Step 2.
-5. Return exactly one valid route from the list.
+5. Verify that the selected route exactly matches one of the seven valid routes.
+6. Return exactly one valid route from the list.
 
 If A, B, and C are all requested, return "all".
-Do not return "both".
+If A and B are requested without C, return "both".
+Do not return "both_and_contact".
 Do not return "both_and_sales_order".
 Do not concatenate route names.
 
@@ -229,6 +248,7 @@ No punctuation.
 No Markdown.
 No additional text.
 """
+
 
 SUPERVISOR_PROMPT = ChatPromptTemplate.from_messages(
     [
