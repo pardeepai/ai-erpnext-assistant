@@ -102,9 +102,11 @@ def lesson_node(state: AgentState):
     }
 
 #----------------Multi Agent Nodes-------------------
+
 def extract_customer_node(state):
     log_state(f"extract_customer_node: {state}", state)
 
+    # Step 1: Extract customer name from the user query.
     customer_name = supervisor.extract_customer_name(
         state["user_query"]
     )
@@ -113,15 +115,26 @@ def extract_customer_node(state):
     if not customer_name:
         return {
             "customer_name": None,
+            "customer_found": False,
         }
 
-    customer_details = customer_service.get_customers(
+    # Step 2: Verify customer exists in ERPNext.
+    customer_found = customer_service.verify_customer_exists(
         customer_name=customer_name
     )
+    print(f"Customer found in ERPNext: {customer_found}")
 
+    # Step 3: Stop if customer does not exist.
+    if not customer_found:
+        return {
+            "customer_name": customer_name,
+            "customer_found": False,
+        }
+
+    # Step 4: Continue workflow for a valid customer.
     return {
         "customer_name": customer_name,
-        #"customer_details": customer_details,
+        "customer_found": True,
     }
 
 
@@ -174,133 +187,6 @@ def contact_agent_node(state):
     }
 
 
-
-def final_response_node(state):
-    log_state(f"final_response_node: {state}", state)
-
-    customer_name = state["customer_name"]
-    route = state["route"]
-    if state.get("sales_order_error"):
-        return {
-            "final_response": (
-                f"Error retrieving sales orders for {customer_name}: "
-                f"{state['sales_order_error']}"
-        )
-    }
-
-    print(state, "state in final response node")
-
-    if route == "details":
-        print("Generating final response for details route")
-
-        customer_details = state["customer_details"]["data"][0]
-
-        final_response = f"""**Customer Information:**
-
-- **Customer Name:** {customer_name}
-- **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
-- **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
-"""
-
-    elif route == "contact":
-        print("Generating final response for contact route")
-
-        customer_contact = state["customer_contact"]["data"][0]
-
-        final_response = f"""**Customer Information:**
-
-- **Customer Name:** {customer_name}
-- **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
-- **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
-"""
-
-    elif route == "both":
-        print("Generating final response for both route")
-
-        customer_details = state["customer_details"]["data"][0]
-        customer_contact = state["customer_contact"]["data"][0]
-
-        final_response = f"""**Customer Information:**
-
-                        - **Customer Name:** {customer_name}
-                        - **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
-                        - **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
-                        - **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
-                        - **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
-                        """
-
-    elif route == "sales_order":
-        print("Generating final response for sales order route")
-
-        final_response = state.get("sales_order_response") or (
-            f"No sales order response was generated for {customer_name}."
-        )
-
-    elif route == "details_and_sales_order":
-        print("Generating final response for details and sales order route")
-
-        customer_details = state["customer_details"]["data"][0]
-        sales_order_response = state.get("sales_order_response") or (
-            f"No sales order response was generated for {customer_name}."
-        )
-
-        final_response = f"""**Customer Information:**
-
-                    - **Customer Name:** {customer_name}
-                    - **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
-                    - **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
-
-
-                        {sales_order_response}
-                        """
-
-    elif route == "contact_and_sales_order":
-        print("Generating final response for contact and sales order route")
-
-        customer_contact = state["customer_contact"]["data"][0]
-        sales_order_response = state.get("sales_order_response") or (
-            f"No sales order response was generated for {customer_name}."
-        )
-
-        final_response = f"""**Customer Information:**
-
-                    - **Customer Name:** {customer_name}
-                    - **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
-                    - **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
-
-
-
-                            {sales_order_response}
-                            """
-
-    elif route == "all":
-        print("Generating final response for all information")
-
-        customer_details = state["customer_details"]["data"][0]
-        customer_contact = state["customer_contact"]["data"][0]
-        sales_order_response = state.get("sales_order_response") or (
-            f"No sales order response was generated for {customer_name}."
-        )
-
-        final_response = f"""**Customer Information:**
-
-                - **Customer Name:** {customer_name}
-                - **Customer Type:** {customer_details.get("customer_type") or "Not Provided"}
-                - **Customer Group:** {customer_details.get("customer_group") or "Not Provided"}
-                - **Phone Number:** {customer_contact.get("phone") or "Not Provided"}
-                - **Email Address:** {customer_contact.get("email_id") or "Not Provided"}
-
-
-                        {sales_order_response}
-                        """
-
-    else:
-        raise ValueError(f"Unknown route: {route}")
-
-    print("Final response generated:", final_response)
-    return {
-        "final_response": final_response
-    }
 
 def sales_order_agent_node(state):
     log_state(f"sales_order_agent_node: {state}", state)
@@ -409,3 +295,137 @@ def retrieve_sales_orders_node(state):
                 "Please try again later."
             ),
         }
+
+
+def get_first_record(state, key):
+    """Safely return the first record or an empty dictionary."""
+    data = (state.get(key) or {}).get("data") or []
+    return data[0] if data else {}
+
+
+def get_sales_order_response(state, customer_name):
+    """Return sales-order response or a fallback message."""
+    return state.get("sales_order_response") or (
+        f"No sales order response was generated for {customer_name}."
+    )
+
+
+def format_customer_details(customer_name, customer_details):
+    """Format basic customer information."""
+    customer_type = customer_details.get("customer_type") or "Not Available"
+    customer_group = customer_details.get("customer_group") or "Not Available"
+
+    return f"""**Customer Information:**
+
+- **Customer Name:** {customer_name}
+- **Customer Type:** {customer_type}
+- **Customer Group:** {customer_group}"""
+
+
+def format_customer_contact(customer_name, customer_contact):
+    """Format customer contact information."""
+    phone = customer_contact.get("phone") or "Not Available"
+    email = customer_contact.get("email_id") or "Not Available"
+
+    return f"""**Customer Information:**
+
+- **Customer Name:** {customer_name}
+- **Phone Number:** {phone}
+- **Email Address:** {email}"""
+
+
+def format_all_customer_info(
+    customer_name, customer_details, customer_contact
+):
+    """Format customer details and contact information."""
+    customer_type = customer_details.get("customer_type") or "Not Available"
+    customer_group = customer_details.get("customer_group") or "Not Available"
+    phone = customer_contact.get("phone") or "Not Available"
+    email = customer_contact.get("email_id") or "Not Available"
+
+    return f"""**Customer Information:**
+
+- **Customer Name:** {customer_name}
+- **Customer Type:** {customer_type}
+- **Customer Group:** {customer_group}
+- **Phone Number:** {phone}
+- **Email Address:** {email}"""
+
+
+def append_sales_orders(customer_info, sales_order_response):
+    """Append sales-order information to customer information."""
+    return f"""{customer_info}
+
+
+
+{sales_order_response}"""
+
+
+def final_response_node(state):
+    """Coordinate final response generation."""
+    log_state(f"final_response_node: {state}", state)
+
+    customer_name = state.get("customer_name") or "Unknown Customer"
+    route = state.get("route")
+    if state.get("customer_found") is False:
+        return {
+        "final_response": (
+            f"Customer '{customer_name}' was not found in ERPNext."
+        )
+    }
+    
+    
+    if state.get("sales_order_error"):
+        return {
+            "final_response": (
+                f"Error retrieving sales orders for {customer_name}: "
+                f"{state['sales_order_error']}"
+            )
+        }
+
+    customer_details = get_first_record(state, "customer_details")
+    customer_contact = get_first_record(state, "customer_contact")
+    sales_orders = get_sales_order_response(state, customer_name)
+
+    if route == "details":
+        response = format_customer_details(
+            customer_name, customer_details
+        )
+
+    elif route == "contact":
+        response = format_customer_contact(
+            customer_name, customer_contact
+        )
+
+    elif route == "both":
+        response = format_all_customer_info(
+            customer_name, customer_details, customer_contact
+        )
+
+    elif route == "sales_order":
+        response = sales_orders
+
+    elif route == "details_and_sales_order":
+        customer_info = format_customer_details(
+            customer_name, customer_details
+        )
+        response = append_sales_orders(customer_info, sales_orders)
+
+    elif route == "contact_and_sales_order":
+        customer_info = format_customer_contact(
+            customer_name, customer_contact
+        )
+        response = append_sales_orders(customer_info, sales_orders)
+
+    elif route == "all":
+        customer_info = format_all_customer_info(
+            customer_name, customer_details, customer_contact
+        )
+        response = append_sales_orders(customer_info, sales_orders)
+
+    else:
+        raise ValueError(f"Unknown route: {route}")
+
+    print("Final response generated:", response)
+
+    return {"final_response": response}
