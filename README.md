@@ -16,6 +16,22 @@ The project has evolved through three stages:
 
 The application uses ERPNext as its business data source and a locally running LLM for language processing.
 
+## Latest PR Update
+
+### What changed
+- Handle unsupported sales order statuses, including `Started` and `Marked`.
+- Propagate status validation errors through `sales_order_error`.
+- Prevent invalid status requests from reaching the ERPNext service.
+- Distinguish empty sales order results from invalid service responses.
+- Display sales order errors in the final response.
+- Add fallback status extraction when the LLM returns `NONE` but a supported status is explicitly present in the user's query.
+
+### Testing
+- Verify supported and unsupported status handling.
+- Verify empty results and API exception handling.
+- Verify sales-order-only and combined customer-details/sales-order routing.
+- Run existing project tests using `python -m pytest`.
+
 ## Application Demo
 
 The screenshot below shows the application running in Gradio.
@@ -96,7 +112,7 @@ This workflow demonstrates how a graph can use state, conditional edges, and ite
 
 ### 3. Multi-Agent Workflow
 
-The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flow exported from the compiled workflow (your workflow Mermaid id):
+The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flow...
 
 ```mermaid
 ---
@@ -135,12 +151,12 @@ graph TD;
 #### Multi-Agent Workflow Steps
 
 1. **Customer Name Extraction:** Extract the customer name from the user's query.
-2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined requests are supported by executing agents in sequence.
+2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined[...]
 3. **Agent Execution:**
    - Customer Details Agent retrieves customer details.
    - Customer Contact Agent retrieves contact information.
    - Sales Order Agent retrieves and formats sales orders.
-4. **Conditional Routing:** For combined queries, agents can indicate follow-on agents to execute (for example, after retrieving sales orders, the graph may route to the details or contact agents as defined in the compiled workflow).
+4. **Conditional Routing:** For combined queries, agents can indicate follow-on agents to execute (for example, after retrieving sales orders, the graph may route to the details or contact agents[...]
 5. **Final Response:** Combine the requested information into one response.
 
 The workflow supports individual requests and combined requests for customer details, contact information, and sales orders.
@@ -372,7 +388,7 @@ ai-erpnext-assistant/
 - **`app/data/`** — Not used; configuration and supporting data are stored under the top-level `data/` directory.
 - **`data/`** — Contains application configuration and supporting data files.
 - **`debug/`** — Contains scripts and text files used during debugging and workflow development.
-- **`tests/`** — Contains tests for ERPNext services, agents, graph components, and workflows. The latest automated run collected two tests (see Testing above); compare the listed files to your repo if you want the README to exactly match the repository tree.
+- **`tests/`** — Contains tests for ERPNext services, agents, graph components, and workflows. The latest automated run collected two tests (see Testing above); compare the listed files to your local tree and keep the README accurate.
 - **`main.py`** — Main application entry point.
 - **`pytest.ini`** — Pytest configuration.
 - **`requirements.txt`** — Python dependencies.
