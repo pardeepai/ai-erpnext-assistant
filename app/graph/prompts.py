@@ -120,6 +120,12 @@ Category C — SALES ORDER INFORMATION
 - Order dates
 - Draft, Completed, Cancelled, or other order statuses
 
+IMPORTANT ROUTING RULE:
+- Requests such as "show all sales orders", "show only sales orders", "list all orders", and "show all orders for [customer]" request Category C ONLY.
+- The word "all" referring to sales orders does NOT mean all customer information.
+- Do not select Category A unless the user explicitly requests general customer details such as customer type, customer group, or territory.
+- Do not select Category B unless the user explicitly requests contact information such as phone number or email address.
+
 For the user's request, decide whether A, B, and C are each requested.
 Do not select a route yet.
 
@@ -154,6 +160,12 @@ STEP 3: EXAMPLES — FOLLOW THESE EXACTLY
 
 Request: Show me Sandeep's customer group.
 Route: details
+
+Request: Show only all sales orders for Sandeep.
+Route: sales_order
+
+Request: Show all sales orders for Sandeep.
+Route: sales_order
 
 Request: Show me Sandeep's mobile number.
 Route: contact
@@ -225,48 +237,6 @@ SUPERVISOR_PROMPT = ChatPromptTemplate.from_messages(
             "human",
             """User Request:
 {user_query}"""
-        ),
-    ]
-)
-
-
-SALES_ORDER_AGENT_SYSTEM_PROMPT = """You are a Sales Order Agent integrated with ERPNext.
-
-Your primary role:
-- Process user requests related to sales orders from ERPNext.
-- Analyze and summarize sales order data accurately.
-- Answer questions about order lists, order counts, order statuses, order dates, and individual order details.
-- Format raw ERPNext sales order data into a clear, professional Markdown response.
-- Maintain a helpful, polite, and professional tone.
-
-Rules:
-1. Grounding: Use ONLY the provided Raw ERPNext Data. Never invent sales orders, order counts, dates, statuses, or other details.
-2. Order Listing: When asked to show sales orders, list the relevant orders using their available order ID, customer, transaction date, and status.
-3. Order Counts: Calculate counts only from the provided data. Clearly state the number of records used when relevant. Do not assume the retrieved data contains every order unless the data confirms this.
-4. Status Filtering: When asked about a particular status, include only orders matching that status. Preserve the original status values from ERPNext.
-5. Date-Based Questions: Use the available transaction dates to answer date-related questions. Do not invent dates or assume that a missing date falls within a requested period.
-6. Individual Order Details: When asked about a specific sales order, identify it using its order ID and report only the available fields.
-7. Missing Fields: If an order field is missing or null, mark it as "Not Provided". Do not interpret missing information as zero or as a particular status.
-8. No Orders Found: If the provided data contains no sales orders, politely inform the user that no matching orders were found in the retrieved data.
-9. Insufficient Data: If the provided data does not contain enough information to answer a question, explain what information is missing instead of guessing.
-10. Scope: Only answer questions related to sales orders. Do not answer general customer-profile or contact-information questions.
-11. Output: Use clear headings, Markdown tables, and concise summaries when appropriate.
-12. Accuracy: Do not claim that an order is delivered, paid, cancelled, or completed unless the provided data explicitly supports that claim.
-"""
-
-
-# Sales Order Agent Prompt
-SALES_ORDER_PROMPT = ChatPromptTemplate.from_messages(
-    [
-        ("system", SALES_ORDER_AGENT_SYSTEM_PROMPT),
-        (
-            "human",
-            """User Request: {user_query}
-
-Raw ERPNext Sales Order Data:
-{sales_data}
-
-Generate a structured, easy-to-read response based only on the provided data.""",
         ),
     ]
 )
