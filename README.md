@@ -26,6 +26,13 @@ The application uses ERPNext as its business data source and a locally running L
 - Display sales order errors in the final response.
 - Add fallback status extraction when the LLM returns `NONE` but a supported status is explicitly present in the user's query.
 
+### Routing and Reliability Improvements
+- Added explicit supervisor routing rules for the seven supported query routes (details, contact, sales orders, and their combined permutations).
+- Improved route classification for combined customer details, contact information, and sales-order requests so the supervisor selects the correct sequence of agents.
+- Prevented unsupported route names from being used during graph execution to avoid unexpected execution paths.
+- Improved handling of missing customer and contact information so unavailable fields are reported clearly rather than treated as populated values.
+- Verified all seven routes and additional reliability scenarios (see Manual Multi-Agent Validation below).
+
 ### Testing
 - Verify supported and unsupported status handling.
 - Verify empty results and API exception handling.
@@ -118,7 +125,7 @@ This workflow demonstrates how a graph can use state, conditional edges, and ite
 
 ### 3. Multi-Agent Workflow
 
-The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flow...
+The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flo[...]
 
 ```mermaid
 ---
@@ -282,7 +289,7 @@ Keep manual multi-agent validation separate from automated test results.
 
 ### Manual Multi-Agent Validation
 
-Manually verified the seven routing combinations:
+Manually verified the seven routing combinations and additional reliability scenarios:
 
 - Customer details
 - Contact information
@@ -292,7 +299,13 @@ Manually verified the seven routing combinations:
 - Contact information and sales orders
 - Customer details, contact information, and sales orders
 
-Also verified sales order status filtering and the final responses for the tested queries.
+Additional reliability scenarios verified:
+
+- Explicit supervisor routing for all seven supported routes
+- Correct classification and execution order for combined routes
+- Prevention of unsupported route names from being executed in the graph
+- Improved handling and clear reporting of missing customer and contact fields
+- Sales order status filtering and final response validation
 
 Only keep manual-validation claims for scenarios that were actually tested.
 
@@ -394,12 +407,12 @@ ai-erpnext-assistant/
 - **`app/data/`** — Not used; configuration and supporting data are stored under the top-level `data/` directory.
 - **`data/`** — Contains application configuration and supporting data files.
 - **`debug/`** — Contains scripts and text files used during debugging and workflow development.
-- **`tests/`** — Contains tests for ERPNext services, agents, graph components, and workflows. The latest automated run collected two tests (see Testing above); compare the listed files to your local tree and keep the README accurate.
+- **`tests/`** — Contains tests for ERPNext services, agents, graph components, and workflows. The latest automated run collected two tests (see Testing above); compare the listed files to your[...]
 - **`main.py`** — Main application entry point.
 - **`pytest.ini`** — Pytest configuration.
 - **`requirements.txt`** — Python dependencies.
 
-*Note: This tree reflects the known project structure. Run `find app tests -maxdepth 3 -type f | sort` locally to verify the tree and remove or add entries so the README matches your repository exactly.*
+*Note: This tree reflects the known project structure. Run `find app tests -maxdepth 3 -type f | sort` locally to verify the tree and remove or add entries so the README matches your repo exactly.*
 
 ## Getting Started
 
