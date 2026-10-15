@@ -121,14 +121,34 @@ class SalesOrderAgent:
                 "error": None,
             }
 
-        # 4. Unexpected extractor output: do not silently ignore it
+        # 4. Fallback: validate the original user query
+        query = user_query.casefold()
+
+        # Reject explicitly unsupported statuses
+        for rejected in REJECTED_SALES_ORDER_STATUSES:
+            if rejected.casefold() in query:
+                return {
+                    "status": None,
+                    "error": f"Unsupported sales order status: {rejected}",
+                }
+
+        # Recover a valid status if the LLM returned an explanation
+        for status in sorted(
+            VALID_SALES_ORDER_STATUSES.values(),
+            key=len,
+            reverse=True,
+        ):
+            if status.casefold() in query:
+                return {
+                    "status": status,
+                    "error": None,
+                }
+
+        # No specific supported or rejected status was requested
         return {
             "status": None,
-            "error": (
-                "Unable to interpret the requested sales order status."
-            ),
+            "error": None,
         }
-
     
     def sales_order_response(self, user_query, sales_order_data):
         orders = sales_order_data.get("data", [])
