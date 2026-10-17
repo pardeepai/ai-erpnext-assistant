@@ -125,7 +125,7 @@ This workflow demonstrates how a graph can use state, conditional edges, and ite
 
 ### 3. Multi-Agent Workflow
 
-The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flo[...]
+The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flow used by the multi-agent graph.
 
 ```mermaid
 ---
@@ -145,7 +145,8 @@ graph TD;
         __end__([<p>__end__</p>]):::last
         __start__ --> customer_name;
         contact_response --> final_response;
-        customer_name --> route;
+        customer_name -. &nbsp;customer_not_found&nbsp; .-> final_response;
+        customer_name -. &nbsp;continue&nbsp; .-> route;
         details_response -. &nbsp;contact_agent&nbsp; .-> contact_response;
         details_response -.-> final_response;
         route -. &nbsp;contact_agent&nbsp; .-> contact_response;
@@ -164,7 +165,7 @@ graph TD;
 #### Multi-Agent Workflow Steps
 
 1. **Customer Name Extraction:** Extract the customer name from the user's query.
-2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined[...]
+2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined[...] 
 3. **Agent Execution:**
    - Customer Details Agent retrieves customer details.
    - Customer Contact Agent retrieves contact information.
@@ -412,7 +413,7 @@ ai-erpnext-assistant/
 - **`pytest.ini`** — Pytest configuration.
 - **`requirements.txt`** — Python dependencies.
 
-*Note: This tree reflects the known project structure. Run `find app tests -maxdepth 3 -type f | sort` locally to verify the tree and remove or add entries so the README matches your repo exactly.*
+*Note: This tree reflects the known project structure. Run `find app tests -maxdepth 3 -type f | sort` locally to verify the tree and remove or add entries so the README matches your repo exactly[...]
 
 ## Getting Started
 
