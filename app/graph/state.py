@@ -14,6 +14,7 @@ class AgentState(TypedDict):
     previous_attempts: list
 
 
+
 class MultiAgentState(TypedDict):
     user_query: str
     customer_name: str | None
@@ -29,4 +30,6 @@ class MultiAgentState(TypedDict):
     details_response: str
     sales_order_response: str
     final_response: str
+
     sales_order_error: str | None
+    ERPNextAPIError: str | None
