@@ -6,6 +6,7 @@ from app.graph.edges import (
     route_request,
     route_after_details,
     route_after_sales_order,
+    route_after_customer_extraction,
 )
 from app.graph.nodes import (
     extract_customer_node,
@@ -31,10 +32,11 @@ graph.add_node("final_response", final_response_node)
 
 # Normal edges
 graph.add_edge(START, "customer_name")
-graph.add_edge("customer_name", "route")
 
 graph.add_edge("contact_response", "final_response")
 graph.add_edge("sales_order_data", "sales_order_response")
+
+graph.add_edge("final_response", END)
 
 # Conditional routing from supervisor
 graph.add_conditional_edges(
@@ -65,6 +67,17 @@ graph.add_conditional_edges(
         "contact_agent": "contact_response",
         "details_agent": "details_response",
         "final_response": "final_response",
+    },
+)
+
+
+graph.add_conditional_edges(
+    "customer_name",
+    route_after_customer_extraction,
+    {
+        "error": "final_response",
+        "customer_not_found": "final_response",
+        "continue": "route",
     },
 )
 

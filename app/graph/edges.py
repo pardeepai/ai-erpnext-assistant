@@ -88,3 +88,13 @@ def route_after_sales_order(state):
 
 #     print("ROUTING DECISION: Contact route completed, moving to final response")
 #     return "final_response"
+
+
+def route_after_customer_extraction(state):
+    if state.get("ERPNextAPIError"):
+        return "error"
+
+    if not state.get("customer_found"):
+        return "customer_not_found"
+
+    return "continue"

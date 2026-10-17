@@ -12,6 +12,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from app.erpnext.customer import CustomerService
 from app.erpnext.sales_order import SalesOrderService
 from app.erpnext.contact import ContactService
+from app.erpnext.client import ERPNextAPIError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -102,11 +103,9 @@ def lesson_node(state: AgentState):
     }
 
 #----------------Multi Agent Nodes-------------------
-
 def extract_customer_node(state):
     log_state(f"extract_customer_node: {state}", state)
 
-    # Step 1: Extract customer name from the user query.
     customer_name = supervisor.extract_customer_name(
         state["user_query"]
     )
@@ -116,27 +115,45 @@ def extract_customer_node(state):
         return {
             "customer_name": None,
             "customer_found": False,
+            "ERPNextAPIError": None,
         }
 
-    # Step 2: Verify customer exists in ERPNext.
-    customer_found = customer_service.verify_customer_exists(
-        customer_name=customer_name
-    )
+    try:
+        customer_found = customer_service.verify_customer_exists(
+            customer_name=customer_name
+        )
+
+    except ERPNextAPIError as exc:
+        print(f"ERPNext API error: {exc}")
+
+        return {
+            "customer_name": customer_name,
+            "customer_found": False,
+            "ERPNextAPIError": str(exc),
+            "final_response": (
+                "I couldn't retrieve customer information because "
+                "ERPNext authentication failed. Please check the "
+                "ERPNext API credentials."
+                if "authentication failed" in str(exc).lower()
+                else "I couldn't retrieve customer information from "
+                     "ERPNext. Please try again later."
+            ),
+        }
+
     print(f"Customer found in ERPNext: {customer_found}")
 
-    # Step 3: Stop if customer does not exist.
     if not customer_found:
         return {
             "customer_name": customer_name,
             "customer_found": False,
+            "ERPNextAPIError": None,
         }
 
-    # Step 4: Continue workflow for a valid customer.
     return {
         "customer_name": customer_name,
         "customer_found": True,
+        "ERPNextAPIError": None,
     }
-
 
 def supervisor_route_node(state):
 
@@ -366,7 +383,17 @@ def final_response_node(state):
     log_state(f"final_response_node: {state}", state)
 
     customer_name = state.get("customer_name") or "Unknown Customer"
+    print('final====================================')
     route = state.get("route")
+    #Handle ERPNext API failure first.
+    if state.get("ERPNextAPIError"):
+        return {
+            "final_response": state["final_response"]
+        }
+
+    # Keep your existing normal response logic here.
+        
+        
     if state.get("customer_found") is False:
         return {
         "final_response": (
