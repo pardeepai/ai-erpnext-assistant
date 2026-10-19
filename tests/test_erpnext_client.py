@@ -63,3 +63,39 @@ def test_connection_error(mock_get, client):
 
     with pytest.raises(ERPNextAPIError, match="connect to ERPNext"):
         client.get("/api/resource/Item")
+
+
+
+@patch("app.erpnext.client.requests.get")
+def test_internal_server_error(mock_get, client):
+    response = Mock()
+    response.status_code = 500
+
+    mock_get.return_value = Mock(
+        raise_for_status=Mock(
+            side_effect=requests.HTTPError(response=response)
+        )
+    )
+
+    with pytest.raises(
+        ERPNextAPIError, match="status 500"
+    ):
+        client.get("/api/resource/Item")
+
+
+
+@patch("app.erpnext.client.requests.get")
+def test_permission_denied(mock_get, client):
+    response = Mock()
+    response.status_code = 403
+
+    mock_get.return_value = Mock(
+        raise_for_status=Mock(
+            side_effect=requests.HTTPError(response=response)
+        )
+    )
+
+    with pytest.raises(
+        ERPNextAPIError, match="Permission denied"
+    ):
+        client.get("/api/resource/Item")
