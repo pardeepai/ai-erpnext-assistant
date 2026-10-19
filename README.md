@@ -16,33 +16,9 @@ The project has evolved through three stages:
 
 The application uses ERPNext as its business data source and a locally running LLM for language processing.
 
-## Latest PR Update
+## Latest PR Update (summary)
 
-### What changed
-- Handle unsupported sales order statuses, including `Started` and `Marked`.
-- Propagate status validation errors through `sales_order_error`.
-- Prevent invalid status requests from reaching the ERPNext service.
-- Distinguish empty sales order results from invalid service responses.
-- Display sales order errors in the final response.
-- Add fallback status extraction when the LLM returns `NONE` but a supported status is explicitly present in the user's query.
-- Added streaming updates from the LangGraph multi-agent workflow so the UI receives incremental node output as the graph executes.
-- Displayed workflow execution progress in the Gradio interface (node-level progress and status indicators).
-- Final response is updated dynamically in the UI as workflow nodes complete, allowing users to see partial results and progress before the full response is finished.
-- Preserved existing multi-agent routing and response-generation logic (no behavior changes to route selection or agent outputs).
-
-### Routing and Reliability Improvements
-- Added explicit supervisor routing rules for the seven supported query routes (details, contact, sales orders, and their combined permutations).
-- Improved route classification for combined customer details, contact information, and sales-order requests so the supervisor selects the correct sequence of agents.
-- Prevented unsupported route names from being used during graph execution to avoid unexpected execution paths.
-- Improved handling of missing customer and contact information so unavailable fields are reported clearly rather than treated as populated values.
-- Verified all seven routes and additional reliability scenarios (see Manual Multi-Agent Validation below).
-
-### Testing
-- Verify supported and unsupported status handling.
-- Verify empty results and API exception handling.
-- Verify sales-order-only and combined customer-details/sales-order routing.
-- Run existing project tests using `python -m pytest`.
-- Verified Gradio streaming/progressive UI updates and workflow execution progress; exercised the relevant workflow routes during manual validation.
+Key improvements focused on routing reliability, status validation, UI streaming, and clear error propagation for sales-order handling. These changes preserve existing agent routing logic while improving status validation, progressive UI updates, and error visibility in final responses.
 
 ## Application Demo
 
@@ -54,11 +30,7 @@ The screenshot below shows the application running in Gradio.
 <img width="653" height="411" alt="image" src="https://github.com/user-attachments/assets/01d3f45f-6b53-4fe2-af05-cb5a742ed4ac" />
 <img width="487" height="405" alt="image" src="https://github.com/user-attachments/assets/9236a826-97fd-40b0-9ffc-cf6ee0042533" />
 
-
-The Gradio UI now supports progressive rendering of workflow execution: node-level progress and partial node outputs are streamed to the interface so users can observe incremental results while the graph executes. Consider adding updated screenshots or short GIFs that show the live/progressive rendering to highlight this behavior.
-
-
-
+The Gradio UI supports progressive rendering of workflow execution: node-level progress and partial node outputs are streamed to the interface so users can observe incremental results while the graph executes.
 
 ## Features
 
@@ -66,12 +38,10 @@ The Gradio UI now supports progressive rendering of workflow execution: node-lev
 - **Customer Contact:** Retrieve customer contact information, including phone number and email address.
 - **Sales Order Retrieval:** Fetch customer sales orders with optional status filtering.
 - **Multi-Agent Workflow:** Route user queries to the appropriate agent based on the request.
-- **Combined Queries:** Support requests for:
-  - Customer details and sales orders
-  - Contact information and sales orders
-  - Customer details, contact information, and sales orders together
-- **Conditional Routing:** Execute the required agents based on the detected query intent.
+- **Combined Queries:** Support requests that combine customer details, contact information, and sales orders.
+- **Conditional Routing:** Execute only required agents based on detected intent.
 - **Structured Responses:** Format customer information and sales-order results for readability.
+- **Missing-data & API error handling:** Clear handling when fields are unavailable or ERPNext returns errors.
 
 ## Example Queries
 
@@ -106,7 +76,6 @@ The project uses different LangGraph workflows to demonstrate increasingly capab
 The Reflection workflow retrieves sales orders for a customer, analyzes the results, and reviews the generated analysis.
 
 Main flow:
-
 1. Retrieve sales orders from ERPNext.
 2. Analyze the retrieved data.
 3. Review the generated analysis.
@@ -119,7 +88,6 @@ The goal is to check the quality and completeness of an answer before returning 
 The Reflexion workflow extends Reflection by introducing feedback, lessons, and retries.
 
 Main flow:
-
 1. Retrieve sales order data.
 2. Generate an analysis.
 3. Evaluate the analysis.
@@ -132,7 +100,7 @@ This workflow demonstrates how a graph can use state, conditional edges, and ite
 
 ### 3. Multi-Agent Workflow
 
-The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flo[...]
+The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flo[...] 
 
 ```mermaid
 ---
@@ -172,12 +140,12 @@ graph TD;
 #### Multi-Agent Workflow Steps
 
 1. **Customer Name Extraction:** Extract the customer name from the user's query.
-2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined[...]
+2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined...
 3. **Agent Execution:**
    - Customer Details Agent retrieves customer details.
    - Customer Contact Agent retrieves contact information.
    - Sales Order Agent retrieves and formats sales orders.
-4. **Conditional Routing:** For combined queries, agents can indicate follow-on agents to execute (for example, after retrieving sales orders, the graph may route to the details or contact agents[...]
+4. **Conditional Routing:** For combined queries, agents can indicate follow-on agents to execute (for example, after retrieving sales orders, the graph may route to the details or contact agents...).
 5. **Final Response:** Combine the requested information into one response.
 
 The workflow supports individual requests and combined requests for customer details, contact information, and sales orders.
@@ -198,21 +166,11 @@ The workflow supports individual requests and combined requests for customer det
 
 ### Customer Supervisor Agent
 
-The supervisor interprets the user's query and determines which customer-related processing path is appropriate.
-
-It supports routing for:
-- Customer details only
-- Contact information only
-- Sales orders only
-- Customer details and contact information
-- Customer details and sales orders
-- Contact information and sales orders
-- All three (customer details, contact information, and sales orders)
+The supervisor interprets the user's query and determines which customer-related processing path is appropriate. It supports routing for all supported combinations of details, contact, and sales orders.
 
 ### Customer Details Agent
 
-The Customer Details Agent handles customer information retrieved from ERPNext, such as:
-
+Handles customer information retrieved from ERPNext, such as:
 - Customer name
 - Customer group
 - Territory
@@ -222,8 +180,7 @@ Unavailable fields are represented clearly rather than being treated as populate
 
 ### Customer Contact Agent
 
-The Customer Contact Agent handles customer contact information, including available fields such as:
-
+Handles customer contact information, including:
 - Mobile number
 - Email address
 
@@ -231,10 +188,9 @@ Missing contact information is identified as unavailable or not provided.
 
 ### Sales Order Agent
 
-The Sales Order Agent retrieves sales orders for a specified customer and supports filtering by sales order status.
+Retrieves sales orders for a specified customer and supports filtering by sales order status.
 
 Supported status filters include:
-
 - Draft
 - To Deliver
 - To Deliver and Bill
@@ -252,7 +208,6 @@ The agent separates status extraction from ERPNext data retrieval so that the re
 The application uses ERPNext REST APIs to retrieve business data.
 
 The integration is organized into service modules for different resources, including:
-
 - Customers
 - Contacts
 - Sales orders
@@ -266,7 +221,6 @@ LangGraph manages workflow execution and passes information between nodes throug
 The Multi-Agent workflow uses routing decisions to select the appropriate processing path. Retrieved data is passed through the graph to the response-generation nodes.
 
 This structure helps separate:
-
 - User query interpretation
 - Routing decisions
 - ERPNext data retrieval
@@ -283,13 +237,7 @@ Run the test suite with:
 python -m pytest
 ```
 
-Latest automated test run (from the most recent check):
-
-- 2 tests collected
-- 2 tests passed
-
-Automated tests referenced in the repository and confirmed in the latest run:
-
+Automated tests referenced in the repository:
 - tests/test_analyzer.py
 - tests/test_reflexion_debug.py
 
@@ -297,8 +245,7 @@ Keep manual multi-agent validation separate from automated test results.
 
 ### Manual Multi-Agent Validation
 
-Manually verified the seven routing combinations and additional reliability scenarios:
-
+Manually verify the seven routing combinations and additional reliability scenarios:
 - Customer details
 - Contact information
 - Sales orders
@@ -307,29 +254,11 @@ Manually verified the seven routing combinations and additional reliability scen
 - Contact information and sales orders
 - Customer details, contact information, and sales orders
 
-Additional reliability scenarios verified:
-
-- Explicit supervisor routing for all seven supported routes
-- Correct classification and execution order for combined routes
-- Prevention of unsupported route names from being executed in the graph
-- Improved handling and clear reporting of missing customer and contact fields
-- Sales order status filtering and final response validation
-
 Only keep manual-validation claims for scenarios that were actually tested.
 
 ## LangSmith Observability
 
-LangSmith is used for tracing and inspecting LangChain/LangGraph execution.
-
-Tracing helps inspect workflow behavior, including:
-
-- Node execution
-- LLM calls
-- Intermediate outputs
-- Workflow errors
-- The flow of information between steps
-
-This supports debugging and understanding how the application processes a request.
+LangSmith is used for tracing and inspecting LangChain/LangGraph execution. Tracing helps inspect node execution, LLM calls, intermediate outputs, workflow errors, and the flow of information between steps.
 
 ## Technology Stack
 
@@ -349,21 +278,195 @@ This supports debugging and understanding how the application processes a reques
 ## Project Structure
 
 ```text
-ai-erpnext-assistant/
-├── app/
-│   ├── agents/
-│   │   ├── analyzer.py
-│   │   ├── reflector.py
-│   │   ├── feedback.py
-│   │   ├── lesson.py
-│   │   ├── customer_supervisor.py
-│   │   │   ├── customer_details_agent.py
-│   │   │   ├── customer_contact_agent.py
-│   │   │   └── sales_order_agent.py
-│   ├── api/
-│   │   └── routes.py
-│   ├── erpnext/
-│   │   ├── client.py
-│   │   ├── customer.py
-│   │   ├── contact.py
-{
+.
+├── README.md
+├── __init__.py
+├── app
+│   ├── __init__.py
+│   ├── agents
+│   │   ├── __init__.py
+│   │   ├── analyzer.py
+│   │   ├── customer_contact_agent.py
+│   │   ├── customer_details_agent.py
+│   │   ├── customer_supervisor.py
+│   │   ├── feedback.py
+│   │   ├── lesson.py
+│   │   ├── reflector.py
+│   │   └── sales_order_agent.py
+│   ├── api
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── erpnext
+│   │   ├── __init__.py
+│   │   ├── client.py
+│   │   ├── contact.py
+│   │   ├── customer.py
+│   │   └── sales_order.py
+│   ├── gradio_app.py
+│   ├── graph
+│   │   ├── __init__.py
+│   │   ├── edges.py
+│   │   ├── nodes.py
+│   │   ├── prompts.py
+│   │   ├── state.py
+│   │   ├── workflow.py
+│   │   └── workflow_multi.py
+│   └── multi_agent_gradio_app.py
+├── data
+│   ├── api_all_keys.json
+│   ├── config.py
+│   └── item.py
+├── debug
+│   ├── debug_graph.py
+│   ├── flow_graph.txt
+│   ├── reflexion_debug.txt
+│   ├── state_debug.txt
+│   └── test.py
+├── main.py
+├── note.txt
+├── pytest.ini
+├── requirements.txt
+└── tests
+    ├── reflexion_debug.txt
+    ├── test_analyzer.py
+    ├── test_client.py
+    ├── test_contact.py
+    ├── test_contact_agent.py
+    ├── test_customer.py
+    ├── test_customer_agent.py
+    ├── test_edges.py
+    ├── test_erpnext_client.py
+    ├── test_nodes.py
+    ├── test_reflector.py
+    ├── test_reflexion_debug.py
+    ├── test_sales_order.py
+    ├── test_sales_order_agent.py
+    ├── test_supervisor.py
+    └── test_workflow.py
+```
+
+*Note: This mirrors the repository structure; adjust only if file locations change in future PRs.*
+
+## Prerequisites
+
+Before running the application, ensure you have:
+- Python 3.12 or a compatible version.
+- Access to a running ERPNext instance.
+- An ERPNext API key and API secret with the necessary read permissions.
+- Ollama installed with the `qwen2.5:3b` model available locally.
+
+Install Ollama from https://ollama.com/ and download the model:
+
+```bash
+ollama pull qwen2.5:3b
+```
+
+## Installation
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/pardeepai/ai-erpnext-assistant.git
+cd ai-erpnext-assistant
+```
+
+2. Create and activate a virtual environment (example for Linux/WSL):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+3. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Configure environment variables
+
+Create a `.env` file in the project root. Minimum required variables:
+
+```env
+ERPNEXT_URL=http://127.0.0.1:8000
+ERPNEXT_API_KEY=your_api_key
+ERPNEXT_API_SECRET=your_api_secret
+```
+
+Optional variables for the local LLM and tracing:
+
+```env
+# Ollama / local model (if used)
+OLLAMA_URL=http://127.0.0.1:11434
+MODEL_NAME=qwen2.5:3b
+
+# LangSmith tracing (optional)
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=your_langsmith_api_key
+LANGSMITH_PROJECT=ai-erpnext-assistant
+```
+
+Security: never commit `.env` or expose API credentials in source code, screenshots, logs, or public repositories. Ensure `.env` is included in `.gitignore`.
+
+## Running the Application
+
+Start Ollama and confirm that the model is available:
+
+```bash
+ollama list
+```
+
+Run the Gradio application from the project root:
+
+```bash
+python multi_agent_gradio_app.py
+```
+
+Open the local Gradio URL displayed in the terminal and enter a business query. If your Gradio entry point is located in a different file, use that path.
+
+## Error Handling
+
+The application includes clear handling for common ERPNext API failures:
+
+| Scenario | Expected behavior |
+|---|---|
+| HTTP 401 | Reports an authentication failure. |
+| HTTP 403 | Reports a permission-related failure. |
+| Customer not found | Handles the missing customer without proceeding as though the customer exists. |
+| Missing contact information | Indicates unavailable phone or email details. |
+| No matching sales orders | Returns an appropriate empty-result response. |
+| Invalid sales-order status | Rejects or safely handles unsupported status values. |
+| API request failure | Uses the application's API error-handling path rather than treating the failure as valid business data. |
+
+Error messages should communicate the problem without exposing API secrets.
+
+## Design Principles
+
+- Keep agent responsibilities focused and separate.
+- Use LangGraph to manage routing and shared workflow state.
+- Keep API credentials outside application source code.
+- Handle missing data and API failures explicitly.
+- Validate changes with tests before merging pull requests.
+- Prefer small, maintainable changes over unnecessary complexity.
+
+## Current Scope
+
+The current focus is a reliable, understandable multi-agent ERPNext assistant. The project is intended as a learning and portfolio project demonstrating API integration, Python development, LangGraph orchestration, error handling, and testing.
+
+It should not be considered production-ready without further deployment hardening, security review, broader automated coverage, and operational validation.
+
+## Future Improvements
+
+Potential improvements include:
+- Additional API failure and edge-case tests
+- Clearer separation of response-formatting helpers
+- Improved documentation and troubleshooting guidance
+- Retrieval-augmented generation (RAG) and evaluation in a subsequent milestone
+
+## Author
+
+**Pardeep Awasthy**
+
+GitHub: [pardeepai](https://github.com/pardeepai)
+
+Repository: [ai-erpnext-assistant](https://github.com/pardeepai/ai-erpnext-assistant)
