@@ -25,6 +25,10 @@ The application uses ERPNext as its business data source and a locally running L
 - Distinguish empty sales order results from invalid service responses.
 - Display sales order errors in the final response.
 - Add fallback status extraction when the LLM returns `NONE` but a supported status is explicitly present in the user's query.
+- Added streaming updates from the LangGraph multi-agent workflow so the UI receives incremental node output as the graph executes.
+- Displayed workflow execution progress in the Gradio interface (node-level progress and status indicators).
+- Final response is updated dynamically in the UI as workflow nodes complete, allowing users to see partial results and progress before the full response is finished.
+- Preserved existing multi-agent routing and response-generation logic (no behavior changes to route selection or agent outputs).
 
 ### Routing and Reliability Improvements
 - Added explicit supervisor routing rules for the seven supported query routes (details, contact, sales orders, and their combined permutations).
@@ -38,6 +42,7 @@ The application uses ERPNext as its business data source and a locally running L
 - Verify empty results and API exception handling.
 - Verify sales-order-only and combined customer-details/sales-order routing.
 - Run existing project tests using `python -m pytest`.
+- Verified Gradio streaming/progressive UI updates and workflow execution progress; exercised the relevant workflow routes during manual validation.
 
 ## Application Demo
 
@@ -49,6 +54,8 @@ The screenshot below shows the application running in Gradio.
 <img width="653" height="411" alt="image" src="https://github.com/user-attachments/assets/01d3f45f-6b53-4fe2-af05-cb5a742ed4ac" />
 <img width="487" height="405" alt="image" src="https://github.com/user-attachments/assets/9236a826-97fd-40b0-9ffc-cf6ee0042533" />
 
+
+The Gradio UI now supports progressive rendering of workflow execution: node-level progress and partial node outputs are streamed to the interface so users can observe incremental results while the graph executes. Consider adding updated screenshots or short GIFs that show the live/progressive rendering to highlight this behavior.
 
 
 
@@ -125,7 +132,7 @@ This workflow demonstrates how a graph can use state, conditional edges, and ite
 
 ### 3. Multi-Agent Workflow
 
-The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flow used by the multi-agent graph.
+The Multi-Agent workflow routes user requests to the appropriate processing path and supports combined queries that execute multiple agents in sequence. The diagram below is the exact Mermaid flo[...]
 
 ```mermaid
 ---
@@ -165,7 +172,7 @@ graph TD;
 #### Multi-Agent Workflow Steps
 
 1. **Customer Name Extraction:** Extract the customer name from the user's query.
-2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined[...] 
+2. **Supervisor Routing:** Identify the requested information and select the appropriate route(s). The supervisor selects among `details_agent`, `contact_agent`, and `sales_order_agent`. Combined[...]
 3. **Agent Execution:**
    - Customer Details Agent retrieves customer details.
    - Customer Contact Agent retrieves contact information.
@@ -359,179 +366,4 @@ ai-erpnext-assistant/
 │   │   ├── client.py
 │   │   ├── customer.py
 │   │   ├── contact.py
-│   │   └── sales_order.py
-│   ├── graph/
-│   │   ├── state.py
-│   │   ├── nodes.py
-│   │   ├── edges.py
-│   │   ├── prompts.py
-│   │   ├── workflow.py
-│   │   └── workflow_multi.py
-│   ├── gradio_app.py
-│   │   └── multi_agent_gradio_app.py
-├── data/
-│   ├── config.py
-│   └── item.py
-├── debug/
-│   ├── debug_graph.py
-│   ├── reflexion_debug.txt
-│   ├── state_debug.txt
-│   └── test.py
-├── tests/
-│   ├── test_analyzer.py
-│   ├── test_client.py
-│   ├── test_contact.py
-│   ├── test_contact_agent.py
-│   ├── test_customer.py
-│   ├── test_customer_agent.py
-│   ├── test_edges.py
-│   ├── test_nodes.py
-│   ├── test_reflector.py
-│   ├── test_reflexion_debug.py
-│   ├── test_sales_order.py
-│   ├── test_sales_order_agent.py
-│   ├── test_supervisor.py
-│   └── test_workflow.py
-├── main.py
-├── pytest.ini
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
-
-### Directory Overview
-
-- **`app/agents/`** — Contains the Reflection and Reflexion components, customer agents, supervisor, and Sales Order Agent.
-- **`app/api/`** — Contains API route definitions.
-- **`app/erpnext/`** — Handles ERPNext API communication and customer, contact, and sales order data retrieval.
-- **`app/graph/`** — Defines graph state, nodes, prompts, routing logic, and workflows.
-- **`app/data/`** — Not used; configuration and supporting data are stored under the top-level `data/` directory.
-- **`data/`** — Contains application configuration and supporting data files.
-- **`debug/`** — Contains scripts and text files used during debugging and workflow development.
-- **`tests/`** — Contains tests for ERPNext services, agents, graph components, and workflows. The latest automated run collected two tests (see Testing above); compare the listed files to your[...]
-- **`main.py`** — Main application entry point.
-- **`pytest.ini`** — Pytest configuration.
-- **`requirements.txt`** — Python dependencies.
-
-*Note: This tree reflects the known project structure. Run `find app tests -maxdepth 3 -type f | sort` locally to verify the tree and remove or add entries so the README matches your repo exactly[...]
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.12 or a compatible version
-- ERPNext instance with API access
-- Ollama installed locally
-- Git
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/pardeepai/ai-erpnext-assistant.git
-cd ai-erpnext-assistant
-```
-
-### 2. Create and activate a virtual environment
-
-On Linux or WSL:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure Ollama
-
-Ensure Ollama is running and pull the model used by the project:
-
-```bash
-ollama pull qwen2.5:3b
-```
-
-### 5. Configure ERPNext credentials
-
-Configure the ERPNext base URL and API credentials using the environment-variable names expected by your application.
-
-Keep credentials in a local `.env` file or another secure configuration mechanism. Do not commit API keys, passwords, or other secrets to GitHub.
-
-### 6. Run the application
-
-Launch the entry point corresponding to the workflow you want to test. For example, for the Gradio multi-agent app:
-
-```bash
-python app/multi_agent_gradio_app.py
-```
-
-Alternatively, run the earlier Gradio app:
-
-```bash
-python app/gradio_app.py
-```
-
-Follow the local URL displayed by Gradio to interact with the application.
-
-*Use the entry point and environment-variable names defined in your current code.*
-
-## Design Principles
-
-The project follows these principles:
-
-- **Separation of concerns:** Keep API retrieval, agent logic, graph orchestration, and interface code separate.
-- **Explicit workflow control:** Use LangGraph state and routing rather than relying on an unstructured sequence of LLM calls.
-- **Local-first LLM execution:** Use Ollama for local inference.
-- **Traceability:** Use tracing tools to inspect execution and debug issues.
-- **Iterative improvement:** Apply feedback and lessons in the Reflexion workflow.
-- **Validation:** Test data retrieval, filtering, routing, and state propagation.
-- **Honest AI behavior:** Represent unavailable business data clearly rather than inventing missing values.
-
-## Current Implementation Status
-
-### Reflection and Reflexion
-
-- [x] ERPNext sales order retrieval
-- [x] Sales order analysis
-- [x] Reflection workflow
-- [x] Reflexion feedback and lesson loop
-- [x] Conditional routing and retry handling
-- [x] Maximum iteration handling
-- [x] Validation of approval and retry behavior
-
-### Multi-Agent System
-
-- [x] Customer name extraction
-- [x] Customer Supervisor Agent
-- [x] Customer Details Agent
-- [x] Customer Contact Agent
-- [x] Sales Order Agent
-- [x] Customer details and contact routing
-- [x] Sales order retrieval and status filtering
-- [x] Handling requests without a status filter
-- [x] Integration of the Sales Order Agent into the complete Multi-Agent workflow
-- [x] End-to-end validation of routing, state updates, and final responses
-- [x] Combined customer and sales order routing
-- [x] Combined contact and sales order routing
-- [x] Combined customer details, contact, and sales order routing
-
-## Project Goals
-
-This project is a hands-on exploration of building AI applications that interact with real business systems.
-
-It demonstrates practical experience with:
-
-- LLM-powered business assistants
-- ERPNext API integration
-- Prompt engineering
-- Reflection and Reflexion patterns
-- Multi-Agent workflow orchestration
-- Stateful graph execution
-- Conditional routing
-- LLM observability and debugging
-- Testing and validating AI application behavior
-
-The long-term goal is to develop AI systems that are useful, traceable, and reliable when working with enterprise business data.
+{
