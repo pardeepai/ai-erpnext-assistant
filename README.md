@@ -37,7 +37,8 @@ The following screenshots demonstrate the application interface, workflow execut
 
 ### 1. Application Interface
 
-![Application Interface](PASTE_APPLICATION_INTERFACE_IMAGE_URL_HERE)
+![Application Interface](<img width="1062" height="481" alt="image" src="https://github.com/user-attachments/assets/d0deec95-536b-44c8-9718-d7e6a7585d9e" />
+)
 
 ### 2. Reflection Workflow
 
