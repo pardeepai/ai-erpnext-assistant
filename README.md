@@ -69,6 +69,8 @@ The following screenshots demonstrate the application interface, workflow execut
 <img width="640" height="426" alt="image" src="https://github.com/user-attachments/assets/e48412f9-0980-4cf7-bce4-20afd0c052d9" />
 <img width="491" height="452" alt="image" src="https://github.com/user-attachments/assets/7653c51e-22a1-4b76-9ee0-53377b94b5fe" />
 <img width="1400" height="562" alt="image" src="https://github.com/user-attachments/assets/72447abc-2339-4d8b-bb15-ca2e842d63c8" />
+<img width="1378" height="490" alt="image" src="https://github.com/user-attachments/assets/121984c9-5765-4cfa-ad4c-4043070cadf5" />
+
 
 
 
