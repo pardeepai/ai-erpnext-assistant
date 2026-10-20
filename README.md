@@ -37,24 +37,41 @@ The following screenshots demonstrate the application interface, workflow execut
 
 ### 1. Application Interface
 
-![Application Interface](<img width="1062" height="481" alt="image" src="https://github.com/user-attachments/assets/d0deec95-536b-44c8-9718-d7e6a7585d9e" />
-)
+<img width="972" height="482" alt="image" src="https://github.com/user-attachments/assets/2a9323bb-aeed-4bab-940c-3aa1cf73deb0" />
+
+
 
 ### 2. Reflection Workflow
 
-![Reflection Workflow](PASTE_REFLECTION_WORKFLOW_IMAGE_URL_HERE)
+<img width="1517" height="886" alt="image" src="https://github.com/user-attachments/assets/687c9745-9a34-4a80-a70e-043f694324a4" />
+
 
 ### 3. Reflexion Workflow
 
-![Reflexion Workflow](PASTE_REFLEXION_WORKFLOW_IMAGE_URL_HERE)
+<img width="1515" height="811" alt="image" src="https://github.com/user-attachments/assets/be9a4904-3167-469c-b8e3-9bebc942e16e" />
+
 
 ### 4. Multi-Agent Workflow
 
-![Multi-Agent Workflow](PASTE_MULTI_AGENT_WORKFLOW_IMAGE_URL_HERE)
+<img width="502" height="530" alt="image" src="https://github.com/user-attachments/assets/f38ecaaf-ffe0-4a5c-8858-d14722c1ae7e" />
+<img width="1251" height="551" alt="image" src="https://github.com/user-attachments/assets/b668b729-89d2-4252-940f-11e24dd9b4f3" />
+<img width="530" height="462" alt="image" src="https://github.com/user-attachments/assets/a1664ebe-eac2-44c8-bf01-72b13c7e8c85" />
+<img width="505" height="660" alt="image" src="https://github.com/user-attachments/assets/e5fb761e-385a-4d24-9f2a-29966ed2d31a" />
+<img width="460" height="766" alt="image" src="https://github.com/user-attachments/assets/108b6ca6-cfd0-46de-9c6c-86fe3fdff200" />
+
+
+
+
+
 
 ### 5. Sales Order Results and Error Handling
 
-![Sales Order Results and Error Handling](PASTE_SALES_ORDER_RESULTS_IMAGE_URL_HERE)
+<img width="640" height="426" alt="image" src="https://github.com/user-attachments/assets/e48412f9-0980-4cf7-bce4-20afd0c052d9" />
+<img width="491" height="452" alt="image" src="https://github.com/user-attachments/assets/7653c51e-22a1-4b76-9ee0-53377b94b5fe" />
+<img width="1400" height="562" alt="image" src="https://github.com/user-attachments/assets/72447abc-2339-4d8b-bb15-ca2e842d63c8" />
+
+
+
 
 ## Example Queries
 
